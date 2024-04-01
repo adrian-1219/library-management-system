@@ -33,11 +33,27 @@ def search(keyword = None, yearRange = None, page = 1):
         cursor.execute("SELECT * FROM books WHERE ISBN LIKE ? OR title LIKE ? OR author LIKE ? OR publisher LIKE ? LIMIT ? OFFSET ?", (keyword, keyword, keyword, keyword, resultsPerPage, (page - 1) * resultsPerPage))
     elif keyword and yearRange:
         keyword = "%" + keyword + "%"
-        cursor.execute("SELECT * FROM books WHERE yearPublished <= ? AND yearPublished >= ? AND (ISBN LIKE ? OR title LIKE ? OR author LIKE ? OR publisher LIKE ?) LIMIT ? OFFSET ?", (yearRange[1], yearRange[0], keyword, keyword, keyword, keyword, resultsPerPage, (page - 1) * resultsPerPage))
+        if str(yearRange[0]) != "Any" and str(yearRange[1]) != "Any":
+            cursor.execute("SELECT * FROM books WHERE yearPublished >= ? AND yearPublished <= ? AND (ISBN LIKE ? OR title LIKE ? OR author LIKE ? OR publisher LIKE ?) LIMIT ? OFFSET ?", \
+                           (yearRange[0], yearRange[1], keyword, keyword, keyword, keyword, resultsPerPage, (page - 1) * resultsPerPage))
+        elif str(yearRange[0]) != "Any":
+            cursor.execute("SELECT * FROM books WHERE yearPublished >= ? AND (ISBN LIKE ? OR title LIKE ? OR author LIKE ? OR publisher LIKE ?) LIMIT ? OFFSET ?", \
+                           (yearRange[0], keyword, keyword, keyword, keyword, resultsPerPage, (page - 1) * resultsPerPage))
+        elif str(yearRange[1]) != "Any":
+            cursor.execute("SELECT * FROM books WHERE yearPublished <= ? AND (ISBN LIKE ? OR title LIKE ? OR author LIKE ? OR publisher LIKE ?) LIMIT ? OFFSET ?", \
+                           (yearRange[1], keyword, keyword, keyword, keyword, resultsPerPage, (page - 1) * resultsPerPage))
     elif not keyword and not yearRange:
         cursor.execute("SELECT * FROM books LIMIT ? OFFSET ?", (resultsPerPage, (page - 1) * resultsPerPage))
     else:
-        cursor.execute("SELECT * FROM books WHERE yearPublished <= ? AND yearPublished >= ? LIMIT ? OFFSET ?", (yearRange[1], yearRange[0], resultsPerPage, (page - 1) * resultsPerPage))
+        if str(yearRange[0]) != "Any" and str(yearRange[1]) != "Any":
+            cursor.execute("SELECT * FROM books WHERE yearPublished >= ? AND yearPublished <= ? LIMIT ? OFFSET ?", \
+                           (yearRange[0], yearRange[1], resultsPerPage, (page - 1) * resultsPerPage))
+        elif str(yearRange[0]) != "Any":
+            cursor.execute("SELECT * FROM books WHERE yearPublished >= ? LIMIT ? OFFSET ?", \
+                           (yearRange[0], resultsPerPage, (page - 1) * resultsPerPage))
+        elif str(yearRange[1]) != "Any":
+            cursor.execute("SELECT * FROM books WHERE yearPublished <= ? LIMIT ? OFFSET ?", \
+                           (yearRange[1], resultsPerPage, (page - 1) * resultsPerPage))
     result = cursor.fetchmany(20) # Limits results to 20 per page
     bookSearchResults = []
     for row in result:

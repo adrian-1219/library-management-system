@@ -1,4 +1,4 @@
-# This file imports book data from Books.csv to sqlite3 database, this only needs to be ran once
+# This file imports book data from Books.csv to sqlite3 database, this only needs to be ran once (if library.db doesn't already exist)
 # Books.csv taken from https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset as suggested by professor
 
 import sqlite3

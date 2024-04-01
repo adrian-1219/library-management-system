@@ -6,7 +6,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Library Management System')
-        self.geometry('1280x480')
+        self.geometry('1280x580')
 
         self.container = tk.Frame(self)
         self.container.pack(expand=True, fill="both", padx=20, pady=20)

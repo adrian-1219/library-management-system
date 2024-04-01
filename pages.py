@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from account_manager import RegisterFunction
-import models
+import models, datetime
 
 
 class StartPage(tk.Frame):
@@ -101,6 +101,9 @@ class SearchPage(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         self.pageResults = []
+        self.page = 1
+        self.pageVar = tk.StringVar()
+        self.pageVar.set(str(self.page))
 
         self.toolbar = CustomToolbar(self, controller)
         self.toolbar.pack(side="top", fill="x")
@@ -109,16 +112,36 @@ class SearchPage(tk.Frame):
         search_container = tk.Frame(self)
         search_container.pack(side="top", fill="x", padx=10, pady=10)
 
+        # Year range selection for search
+        print(datetime.date.today())
+        years = list(range(1900, datetime.date.today().year + 1))
+        years.append("Any")
+        self.yearRangeLabel = tk.Label(search_container, text="Year Range: ")
+        self.yearRangeLabel.pack(side="left")
+        self.yearStartCombobox = ttk.Combobox(search_container, values=years, width=5)
+        self.yearStartCombobox.pack(side="left")
+        self.yearStartCombobox.set("Any")
+        self.yearEndCombobox = ttk.Combobox(search_container, values=years, width=5)
+        self.yearEndCombobox.pack(side="left")
+        self.yearEndCombobox.set("Any")
+        
         # Search Entry
+        self.searchLabel = tk.Label(search_container, text=" Search: ")
+        self.searchLabel.pack(side="left")
         self.search_var = tk.StringVar()
         self.searchEntry = tk.Entry(search_container, textvariable=self.search_var)
         self.searchEntry.pack(side="left", expand=True, fill="x", padx=(0, 5))
 
         # Search Button
-        searchBtn = tk.Button(search_container, text='Search', command=self.search)
+        searchBtn = tk.Button(search_container, text='Search', command=self.newSearch)
         searchBtn.pack(side="left")
 
+        # Search results treeview
         self.treeview = ttk.Treeview(self, columns=("title", "author", "year", "publisher"))
+        self.treeview.column("#0", width=100)
+        self.treeview.column("title", width=600)
+        self.treeview.column("author", width=200)
+        self.treeview.column("year", width=50)
         self.treeview.heading("#0", text="ISBN")
         self.treeview.heading("title", text="Title")
         self.treeview.heading("author", text="Author")
@@ -126,11 +149,54 @@ class SearchPage(tk.Frame):
         self.treeview.heading("publisher", text="Publisher")
         self.treeview.pack(side="top", expand=True, fill="both", padx=10, pady=(5, 0))
 
+        # Result page controls
+        pageContainer = tk.Frame(self)
+        pageContainer.pack(side="top", fill="x", pady=5)
+        self.paddingLeft = tk.Label(pageContainer)
+        self.paddingLeft.pack(side="left", fill="x", expand=True)
+        self.prevPageBtn = tk.Button(pageContainer, text="<<<", command=self.prevPage, state="disabled")
+        self.prevPageBtn.pack(side="left")
+        self.pageNum = tk.Label(pageContainer, textvariable=self.pageVar, width=5)
+        self.pageNum.pack(side="left")
+        self.nextPageBtn = tk.Button(pageContainer, text=">>>", command=self.nextPage, state="disabled")
+        self.nextPageBtn.pack(side="left")
+        self.paddingRight = tk.Label(pageContainer)
+        self.paddingRight.pack(side="left", fill="x", expand=True)
+
+    def newSearch(self):
+        self.page = 1 
+        self.pageVar.set(str(self.page))
+        self.search()
 
     def search(self):
         keyword = self.search_var.get()
-        self.pageResults = models.search(keyword)
+        yearStart = self.yearStartCombobox.get()
+        yearEnd = self.yearEndCombobox.get()
+        yearRange = [yearStart, yearEnd]
+        if str(yearStart) == "Any" and str(yearEnd) == "Any":
+            yearRange = None
+        self.pageResults = models.search(keyword, yearRange, self.page)
         self.displayResults()
+
+        # Set page controls
+        if self.page == 1:
+            self.prevPageBtn["state"] = "disabled"
+        else:
+            self.prevPageBtn["state"] = "normal"
+        if models.search(keyword, yearRange, self.page + 1):
+            self.nextPageBtn["state"] = "normal"
+        else:
+            self.nextPageBtn["state"] = "disabled"
+
+    def nextPage(self):
+        self.page += 1 
+        self.pageVar.set(str(self.page))
+        self.search()
+
+    def prevPage(self):
+        self.page -= 1 
+        self.pageVar.set(str(self.page))
+        self.search()
 
     def displayResults(self):
         self.treeview.delete(*self.treeview.get_children())
