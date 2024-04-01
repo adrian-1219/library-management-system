@@ -63,19 +63,18 @@ class LoginPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-
         controller.add_menu(self)
         tk.Label(self, text="Login").place(relx=0.5, rely=0.3, anchor="center")
 
-        username_label = tk.Label(self, text="Username")
-        username_label.place(relx=0.4, rely=0.4, anchor="e")
+        username_label = tk.Label(self, text="Username: ")
+        username_label.place(relx=0.45, rely=0.4, anchor="e")
         username_entry = ttk.Entry(self)
-        username_entry.place(relx=0.4, rely=0.4, anchor="w")
+        username_entry.place(relx=0.45, rely=0.4, anchor="w")
 
-        password_label = tk.Label(self, text="Password")
-        password_label.place(relx=0.4, rely=0.5, anchor="e")
+        password_label = tk.Label(self, text="Password: ")
+        password_label.place(relx=0.45, rely=0.5, anchor="e")
         password_entry = ttk.Entry(self, show="*")
-        password_entry.place(relx=0.4, rely=0.5, anchor="w")
+        password_entry.place(relx=0.45, rely=0.5, anchor="w")
 
         ttk.Button(self, text="Login",
                    command=lambda: controller.show_frame("HomePage")).place(relx=0.5, rely=0.6, anchor="center")
@@ -103,13 +102,21 @@ class SearchPage(tk.Frame):
         self.controller = controller
         self.pageResults = []
 
+        self.toolbar = CustomToolbar(self, controller)
+        self.toolbar.pack(side="top", fill="x")
+
+        # Container Frame for search
+        search_container = tk.Frame(self)
+        search_container.pack(side="top", fill="x", padx=10, pady=10)
+
+        # Search Entry
         self.search_var = tk.StringVar()
+        self.searchEntry = tk.Entry(search_container, textvariable=self.search_var)
+        self.searchEntry.pack(side="left", expand=True, fill="x", padx=(0, 5))
 
-        self.searchEntry = tk.Entry(self, textvariable=self.search_var)
-        self.searchEntry.pack()
-
-        searchBtn = tk.Button(self, text='Search', command=self.search)
-        searchBtn.pack()
+        # Search Button
+        searchBtn = tk.Button(search_container, text='Search', command=self.search)
+        searchBtn.pack(side="left")
 
         self.treeview = ttk.Treeview(self, columns=("title", "author", "year", "publisher"))
         self.treeview.heading("#0", text="ISBN")
@@ -117,7 +124,8 @@ class SearchPage(tk.Frame):
         self.treeview.heading("author", text="Author")
         self.treeview.heading("year", text="Year")
         self.treeview.heading("publisher", text="Publisher")
-        self.treeview.pack()
+        self.treeview.pack(side="top", expand=True, fill="both", padx=10, pady=(5, 0))
+
 
     def search(self):
         keyword = self.search_var.get()
@@ -141,7 +149,11 @@ class BorrowedBooksPage(tk.Frame):
 
 
 class AccountPage(tk.Frame):
-    # Placeholder for AccountPage
+    # Placeholder for AccountPage and Borrowed books details go in this page
+    pass
+
+class RecommendPage(tk.Frame):
+    # for books suggestions based on user's borrowing history
     pass
 
 
@@ -159,9 +171,10 @@ class CustomToolbar(tk.Frame):
         account_menu = tk.Menubutton(self, text="Account", relief=tk.RAISED)
         account_menu.menu = tk.Menu(account_menu, tearoff=0)
         account_menu["menu"] = account_menu.menu
-        account_menu.menu.add_command(label="Account Page", command=lambda: controller.show_frame(AccountPage))
-        account_menu.menu.add_command(label="Borrowed", command=lambda: controller.show_frame(BorrowedBooksPage))
-        account_menu.menu.add_command(label="Log out", command=lambda: controller.show_frame(StartPage))
+        account_menu.menu.add_command(label="Account Setting", command=lambda: controller.show_frame("AccountPage"))
+        account_menu.menu.add_command(label="Borrowed Books", command=lambda: controller.show_frame("BorrowedBooksPage"))
+        account_menu.menu.add_command(label="Recommendation", command=lambda: controller.show_frame("RecommendPage"))
+        account_menu.menu.add_command(label="Log out", command=lambda: controller.show_frame("StartPage"))
         account_menu.pack(side="right", padx=10)
 
         # Search Button
