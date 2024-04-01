@@ -127,8 +127,8 @@ class LoginPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+
         controller.add_menu(self)
-        
         tk.Label(self, text="Login").place(relx=0.5, rely=0.3, anchor="center")
         
         username_label = tk.Label(self, text="Username")
@@ -144,18 +144,18 @@ class LoginPage(tk.Frame):
         ttk.Button(self, text="Login",
                    command=lambda: controller.show_frame(HomePage)).place(relx=0.5, rely=0.6, anchor="center")
 
-    def not_find(self):
-        username = username_entry.get()
-        password = password_entry.get()
-
-        result_n = RegisterFunction.check_username(username)
-        result_p = RegisterFunction.check_username(password)
-
-        if result_n and result_p:
-            messagebox.showinfo('Success', 'Login successfully')
-            self.controller.show_frame(HomePage)
-        else:
-            messagebox.showinfo('Error', 'Login failed, please create an account or check password')
+    # def not_find(self):
+    #     username = username_entry.get()
+    #     password = password_entry.get()
+    #
+    #     result_n = RegisterFunction.check_username(username)
+    #     result_p = RegisterFunction.check_username(password)
+    #
+    #     if result_n and result_p:
+    #         messagebox.showinfo('Success', 'Login successfully')
+    #         self.controller.show_frame(HomePage)
+    #     else:
+    #         messagebox.showinfo('Error', 'Login failed, please create an account or check password')
 
         
 class HomePage(tk.Frame):
@@ -171,13 +171,12 @@ class HomePage(tk.Frame):
         ttk.Button(self, text="Logout",
                 command=lambda: controller.show_frame(StartPage)).place(relx=0.5, rely=0.5, anchor="center")
 
-
 class CustomToolbar(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        self.search_icon = tk.PhotoImage(file="search.png")
+        self.search_icon = tk.PhotoImage(file="assets/search.png")
 
         # home page button
         tk.Button(self, text="Home", command=lambda: controller.show_frame(HomePage)).pack(side="left", padx=10)
@@ -207,6 +206,7 @@ class CustomToolbar(tk.Frame):
 
     def change_colour(self):
         pass
+
 
 class SearchPage(tk.Frame):
     def __init__(self, parent, controller):
