@@ -7,11 +7,18 @@
     <list default="true" id="f43b75b9-c26f-4630-9b66-279621df678b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/account.db" beforeDir="false" afterPath="$PROJECT_DIR$/account.db" afterDir="false" />
+<<<<<<< Updated upstream
       <change beforePath="$PROJECT_DIR$/account_register_1.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/interface.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/interface1.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/library-management-system.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/search.png" beforeDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/books_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/prev_files_4_record/adrian_search_testFile.py" beforeDir="false" afterPath="$PROJECT_DIR$/prev_files_4_record/adrian_search_testFile.py" afterDir="false" />
+>>>>>>> Stashed changes
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,7 +54,12 @@
     "last_opened_file_path": "/Users/frankfu/Documents/GitHub/library-management-system",
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.140625",
+<<<<<<< Updated upstream
     "project.structure.side.proportion": "0.2"
+=======
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.keymap"
+>>>>>>> Stashed changes
   }
 }]]></component>
   <component name="RecentsManager">
@@ -152,6 +164,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="books_manager" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="library-management-system" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/books_manager.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="library-management-system" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -247,9 +280,15 @@
       <list>
         <item itemvalue="Python.main" />
         <item itemvalue="Python.pages" />
+<<<<<<< Updated upstream
         <item itemvalue="Python.interface1" />
         <item itemvalue="Python.start_page" />
         <item itemvalue="Python.account_register" />
+=======
+        <item itemvalue="Python.adrian_search_testFile" />
+        <item itemvalue="Python.books_manager" />
+        <item itemvalue="Python.prev_main" />
+>>>>>>> Stashed changes
       </list>
     </recent_temporary>
   </component>

@@ -1,5 +1,6 @@
 import tkinter as tk
-from pages import StartPage, RegisterPage, LoginPage, HomePage, SearchPage, BorrowedBooksPage, AccountPage
+from pages import StartPage, RegisterPage, LoginPage, HomePage, SearchPage, BorrowedBooksPage, AccountPage, \
+    BookDetailsPage
 
 
 class App(tk.Tk):
@@ -13,6 +14,7 @@ class App(tk.Tk):
 
         self.frames = {}
 
+
         for F in (StartPage, RegisterPage, LoginPage, HomePage, SearchPage):
             frame = F(parent=self.container, controller=self)
             self.frames[F.__name__] = frame  # Use class name as string for key
@@ -24,13 +26,20 @@ class App(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
 
+    # a function that will show the details of a book according to the book_id
+    def show_book(self, cont, book):
+        frame = BookDetailsPage(parent=self.container, controller=self, book=book)
+        self.frames[cont] = frame
+        frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)
+        frame.tkraise()
+
     def add_menu(self, frame):
         menu_bar = tk.Menu(frame)
         self.config(menu=menu_bar)
 
         file_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Help", menu=file_menu)
-        file_menu.add_command(label="Start Page", command=lambda: self.show_frame(StartPage))
+        file_menu.add_command(label="Start Page", command=lambda: self.show_frame("StartPage"))
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.quit)
 
