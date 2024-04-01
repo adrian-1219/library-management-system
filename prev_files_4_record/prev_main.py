@@ -53,7 +53,7 @@ class StartPage(tk.Frame):
 
 class RegisterFunction():
     def create_table():
-        conn = sqlite3.connect('account.db')
+        conn = sqlite3.connect('../account.db')
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS account
                     (username TEXT PRIMARY KEY NOT NULL,
@@ -62,14 +62,14 @@ class RegisterFunction():
         conn.close()
 
     def insert_account(username, password):
-        conn = sqlite3.connect('account.db')
+        conn = sqlite3.connect('../account.db')
         c = conn.cursor()
         c.execute("INSERT INTO account (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         conn.close() 
 
     def check_username(username):
-        conn = sqlite3.connect('account.db')
+        conn = sqlite3.connect('../account.db')
         c = conn.cursor()
         c.execute("SELECT * FROM account WHERE username = ?", (username,))
         result = c.fetchone()
@@ -177,7 +177,7 @@ class CustomToolbar(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
 
-        self.search_icon = tk.PhotoImage(file="search.png")
+        self.search_icon = tk.PhotoImage(file="../assets/search.png")
 
         # home page button
         tk.Button(self, text="Home", command=lambda: controller.show_frame(HomePage)).pack(side="left", padx=10)

@@ -8,7 +8,7 @@ connection = sqlite3.connect("library.db")
 cursor = connection.cursor()
 cursor.execute("CREATE TABLE IF NOT EXISTS books (ISBN TEXT PRIMARY KEY, title TEXT, author TEXT, yearPublished INTEGER, publisher TEXT)")
 
-with open('Books.csv', mode ='r')as file:
+with open('book_info/Books.csv', mode ='r')as file:
     csvFile = csv.reader(file)
     for row in csvFile:
         if row[0] != "ISBN":
