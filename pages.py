@@ -216,7 +216,74 @@ class BorrowedBooksPage(tk.Frame):
 
 class AccountPage(tk.Frame):
     # Placeholder for AccountPage and Borrowed books details go in this page
-    pass
+    def __init__(self, parent, controller, username):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.username = username
+
+        tk.Label(self, text="Account Page", font=("Helvetica", 20)).place(relx=0.5, rely=0.1, anchor="center")
+        tk.Label(self, text="Username:").place(relx=0.3, rely=0.3, anchor="e")
+        tk.Label(self, text=username).place(relx=0.35, rely=0.3, anchor="w")
+
+        tk.Label(self, text="Password:").place(relx=0.3, rely=0.4, anchor="e")
+        password = self.get_password(username)
+        tk.Label(self, text=password).place(relx=0.35, rely=0.4, anchor="w")
+
+        ttk.Button(self, text="Modify Username", command=self.modify_username).place(relx=0.5, rely=0.5,
+                                                                                     anchor="center")
+        ttk.Button(self, text="Modify Password", command=self.modify_password).place(relx=0.5, rely=0.6,
+                                                                                     anchor="center")
+        ttk.Button(self, text="Modify Email", command=self.modify_email).place(relx=0.5, rely=0.7,
+                                                                               anchor="center")
+        ttk.Button(self, text="Logout", command=self.logout).place(relx=0.5, rely=0.8, anchor="center")
+
+    def get_password(self, username):
+        conn = sqlite3.connect('account.db')
+        c = conn.cursor()
+        c.execute("SELECT password FROM account WHERE username = ?", (username,))
+        result = c.fetchone()
+        conn.close()
+        return result[0] if result else ""
+
+    def modify_username(self):
+        new_username = simpledialog.askstring("Input", "Enter new username:", parent=self)
+        if new_username:
+            result = RegisterFunction.check_username(new_username)
+            if result:
+                messagebox.showinfo('Error', 'Username already exists')
+            else:
+                conn = sqlite3.connect('account.db')
+                c = conn.cursor()
+                c.execute("UPDATE account SET username = ? WHERE username = ?", (new_username, self.username))
+                conn.commit()
+                conn.close()
+                messagebox.showinfo('Success', 'Username modified successfully')
+                self.controller.show_frame(AccountPage, new_username)
+
+    def modify_password(self):
+        new_password = simpledialog.askstring("Input", "Enter new password:", parent=self)
+        if new_password:
+            conn = sqlite3.connect('account.db')
+            c = conn.cursor()
+            c.execute("UPDATE account SET password = ? WHERE username = ?", (new_password, self.username))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo('Success', 'Password modified successfully')
+
+    def modify_email(self):
+        new_email = simpledialog.askstring("Input", "Enter new email:", parent=self)
+        if new_email:
+            conn = sqlite3.connect('account.db')
+            c = conn.cursor()
+            c.execute("UPDATE account SET email = ? WHERE username = ?", (new_email, self.username))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo('Success', 'Email modified successfully')
+
+    def logout(self):
+        RegisterFunction.delete_account(self.username)
+        messagebox.showinfo('Success', 'Account deleted successfully')
+        self.controller.show_frame(StartPage)
 
 class RecommendPage(tk.Frame):
     # for books suggestions based on user's borrowing history
