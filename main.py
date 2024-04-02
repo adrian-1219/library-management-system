@@ -11,6 +11,8 @@ class App(tk.Tk):
         self.container = tk.Frame(self)
         self.container.pack(expand=True, fill="both", padx=20, pady=20)
 
+        self.username = None
+
         self.frames = {}
 
         for F in (StartPage, RegisterPage, LoginPage, HomePage, SearchPage):
@@ -37,6 +39,13 @@ class App(tk.Tk):
     # a function that will show the details of a book according to the book_id
     def show_book(self, cont, book):
         frame = BookDetailsPage(parent=self.container, controller=self, book=book)
+        self.frames[cont] = frame
+        frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)
+        frame.tkraise()
+
+    # this needs to be ran after self.controller.username is set, otherwise it doesn't retrieve the username properly
+    def show_borrow_history(self, cont):
+        frame = BorrowedBooksPage(parent=self.container, controller=self)
         self.frames[cont] = frame
         frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)
         frame.tkraise()

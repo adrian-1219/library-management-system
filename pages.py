@@ -3,7 +3,7 @@ import sqlite3
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from account_manager import RegisterFunction
-import book_manager, datetime
+import book_manager, datetime, borrow_manager
 
 
 class StartPage(tk.Frame):
@@ -90,6 +90,7 @@ class LoginPage(tk.Frame):
         if self.check_password(username, password):
             messagebox.showinfo("Login Successful", "You have successfully logged in.")
             self.controller.show_frame("HomePage")
+            self.controller.username = username
         else:
             messagebox.showerror("Login Failed", "Incorrect username or password.")
 
@@ -148,12 +149,61 @@ class BookDetailsPage(tk.Frame):
         tk.Label(self, text="Book Details", font=("Helvetica", 20, "bold")).pack(pady=10)
 
         # Display book information
-        tk.Label(self, text=f"Title: {self.book.title}", font=("Helvetica", 16)).pack()
-        tk.Label(self, text=f"Author: {self.book.author}", font=("Helvetica", 16)).pack()
-        tk.Label(self, text=f"ISBN: {self.book.ISBN}", font=("Helvetica", 16)).pack()
-        tk.Label(self, text=f"Year Published: {self.book.yearPublished}", font=("Helvetica", 16)).pack()
-        tk.Label(self, text=f"Publisher: {self.book.publisher}", font=("Helvetica", 16)).pack()
+        self.displayBookDetails()
 
+        print(self.controller.username)
+
+        # Borrow or return button
+        if borrow_manager.borrowed(self.controller.username, self.book.ISBN):
+            self.borrowReturnBtn = tk.Button(self, text="Return", command=self.returnBook)
+            self.borrowReturnBtn.pack()
+        else:
+            self.borrowReturnBtn = tk.Button(self, text="Borrow", command=self.borrowBook)
+            self.borrowReturnBtn.pack()
+
+    def displayBookDetails(self):
+        self.titleLabel = tk.Label(self, text=f"Title: {self.book.title}", font=("Helvetica", 16))
+        self.authorLabel = tk.Label(self, text=f"Author: {self.book.author}", font=("Helvetica", 16))
+        self.ISBNLabel = tk.Label(self, text=f"ISBN: {self.book.ISBN}", font=("Helvetica", 16))
+        self.yearLabel = tk.Label(self, text=f"Year Published: {self.book.yearPublished}", font=("Helvetica", 16))
+        self.publisherLabel = tk.Label(self, text=f"Publisher: {self.book.publisher}", font=("Helvetica", 16))
+        self.availabilityLabel = tk.Label(self, text=f"Availability: {self.book.availability}", font=("Helvetica", 16))
+        self.titleLabel.pack()
+        self.authorLabel.pack()
+        self.ISBNLabel.pack()
+        self.yearLabel.pack()
+        self.publisherLabel.pack()
+        self.availabilityLabel.pack()
+
+    def clearBookDetails(self):
+        self.titleLabel.pack_forget()
+        self.authorLabel.pack_forget()
+        self.ISBNLabel.pack_forget()
+        self.yearLabel.pack_forget()
+        self.publisherLabel.pack_forget()
+        self.availabilityLabel.pack_forget()
+
+    def returnBook(self):
+        borrow_manager.returnBook(self.controller.username, self.book.ISBN)
+        # refresh details
+        self.book = book_manager.getBookDetails(self.book.ISBN)
+        self.clearBookDetails()
+        self.displayBookDetails()
+        # change button
+        self.borrowReturnBtn.pack_forget()
+        self.borrowReturnBtn = tk.Button(self, text="Borrow", command=self.borrowBook)
+        self.borrowReturnBtn.pack()
+
+    def borrowBook(self):
+        borrow_manager.borrowBook(self.controller.username, self.book.ISBN)
+        # refresh details
+        self.book = book_manager.getBookDetails(self.book.ISBN)
+        self.clearBookDetails()
+        self.displayBookDetails()
+        # change button
+        self.borrowReturnBtn.pack_forget()
+        self.borrowReturnBtn = tk.Button(self, text="Return", command=self.returnBook)
+        self.borrowReturnBtn.pack()
 
 
 class SearchPage(tk.Frame):
@@ -212,8 +262,6 @@ class SearchPage(tk.Frame):
         # Result page controls
         pageContainer = tk.Frame(self)
         pageContainer.pack(side="top", fill="x", pady=5)
-        self.paddingLeft = tk.Label(pageContainer)
-        self.paddingLeft.pack(side="left", fill="x", expand=True)
         self.prevPageBtn = tk.Button(pageContainer, text="<<<", command=self.prevPage, state="disabled")
         self.prevPageBtn.pack(side="left")
         self.pageNum = tk.Label(pageContainer, textvariable=self.pageVar, width=5)
@@ -222,6 +270,8 @@ class SearchPage(tk.Frame):
         self.nextPageBtn.pack(side="left")
         self.paddingRight = tk.Label(pageContainer)
         self.paddingRight.pack(side="left", fill="x", expand=True)
+        self.detailsBtn = tk.Button(pageContainer, text="Details", command=self.goToBookDetails)
+        self.detailsBtn.pack(side="left")
 
     def newSearch(self):
         self.page = 1 
@@ -267,11 +317,114 @@ class SearchPage(tk.Frame):
                 text=result.ISBN,
                 values=(result.title, result.author, result.yearPublished, result.publisher)
             )
+    
+    def goToBookDetails(self):
+        curItem = self.treeview.item(self.treeview.focus())
+        print("focus(): ", self.treeview.focus())
+        print(curItem)
+        if curItem["text"]:
+            book = book_manager.getBookDetails(curItem["text"])
+            self.controller.show_book("BookDetailsPage", book)
 
 
 class BorrowedBooksPage(tk.Frame):
-    # Placeholder for BorrowedBooksPage
-    pass
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+        self.toolbar = CustomToolbar(self, controller)
+        self.toolbar.pack(side="top", fill="x")
+
+        self.loanPeriod = 21 # Set book loan period to 21 days
+
+        tk.Label(self, text="Books Borrowed History", font=("Helvetica", 20, "bold")).pack(pady=10)
+        self.page = 1
+        self.pageVar = tk.StringVar()
+        self.pageVar.set(str(self.page))
+
+        # Borrow history treeview
+        self.treeview = ttk.Treeview(self, columns=("title", "author", "dateBorrowed", "status"))
+        self.treeview.column("#0", width=100)
+        self.treeview.column("title", width=600)
+        self.treeview.column("author", width=200)
+        self.treeview.column("dateBorrowed", width=200)
+        self.treeview.column("status")
+        self.treeview.heading("#0", text="ISBN")
+        self.treeview.heading("title", text="Title")
+        self.treeview.heading("author", text="Author")
+        self.treeview.heading("dateBorrowed", text="Date Borrowed")
+        self.treeview.heading("status", text="Status")
+        self.treeview.pack(side="top", expand=True, fill="both", padx=10, pady=(5, 0))
+
+        # Borrow history page controls
+        pageContainer = tk.Frame(self)
+        pageContainer.pack(side="top", fill="x", pady=5)
+        self.prevPageBtn = tk.Button(pageContainer, text="<<<", command=self.prevPage, state="disabled")
+        self.prevPageBtn.pack(side="left")
+        self.pageNum = tk.Label(pageContainer, textvariable=self.pageVar, width=5)
+        self.pageNum.pack(side="left")
+        self.nextPageBtn = tk.Button(pageContainer, text=">>>", command=self.nextPage, state="disabled")
+        self.nextPageBtn.pack(side="left")
+        self.paddingRight = tk.Label(pageContainer)
+        self.paddingRight.pack(side="left", fill="x", expand=True)
+        self.detailsBtn = tk.Button(pageContainer, text="Details", command=self.goToBookDetails)
+        self.detailsBtn.pack(side="left")
+
+        self.pageResults = borrow_manager.getBorrowHistory(self.controller.username, self.page)
+        print(self.controller.username, self.page)
+        print(self.pageResults)
+        self.displayResults()
+
+    def nextPage(self):
+        self.page += 1 
+        self.pageVar.set(str(self.page))
+        self.pageResults = borrow_manager.getBorrowHistory(self.controller.username, self.page)
+        self.displayResults()
+
+    def prevPage(self):
+        self.page -= 1 
+        self.pageVar.set(str(self.page))
+        self.pageResults = borrow_manager.getBorrowHistory(self.controller.username, self.page)
+        self.displayResults()
+
+    def displayResults(self):
+        self.treeview.delete(*self.treeview.get_children())
+        for result in self.pageResults:
+            status = ""
+            returnDate = result.dateBorrowed + datetime.timedelta(days=self.loanPeriod)
+            if not result.dateReturned:
+                # check how long its been since date borrowed
+                if datetime.datetime.now() > returnDate:
+                    status = "OVERDUE"
+                else:
+                    status = "DUE ON " + returnDate.strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                if result.dateReturned > returnDate:
+                    status = "RETURNED LATE"
+                else:
+                    status = "RETURNED"
+            self.treeview.insert(
+                "",
+                tk.END,
+                text=result.bookISBN,
+                values=(result.bookTitle, result.bookAuthor, result.dateBorrowed, status)
+            )
+        # Set page controls
+        if self.page == 1:
+            self.prevPageBtn["state"] = "disabled"
+        else:
+            self.prevPageBtn["state"] = "normal"
+        if borrow_manager.getBorrowHistory(self.controller.username, self.page + 1):
+            self.nextPageBtn["state"] = "normal"
+        else:
+            self.nextPageBtn["state"] = "disabled"
+
+    def goToBookDetails(self):
+        curItem = self.treeview.item(self.treeview.focus())
+        print("focus(): ", self.treeview.focus())
+        print(curItem)
+        if curItem["text"]:
+            book = book_manager.getBookDetails(curItem["text"])
+            self.controller.show_book("BookDetailsPage", book)
 
 
 class AccountPage(tk.Frame):
@@ -368,7 +521,7 @@ class CustomToolbar(tk.Frame):
         account_menu.menu = tk.Menu(account_menu, tearoff=0)
         account_menu["menu"] = account_menu.menu
         account_menu.menu.add_command(label="Account Setting", command=lambda: controller.show_frame("AccountPage"))
-        account_menu.menu.add_command(label="Borrowed Books", command=lambda: controller.show_frame("BorrowedBooksPage"))
+        account_menu.menu.add_command(label="Borrowed Books", command=lambda: controller.show_borrow_history("BorrowedBooksPage"))
         account_menu.menu.add_command(label="Recommendation", command=lambda: controller.show_frame("RecommendPage"))
         account_menu.menu.add_command(label="Log out", command=lambda: controller.show_frame("StartPage"))
         account_menu.pack(side="right", padx=10)

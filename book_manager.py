@@ -6,12 +6,13 @@ connection = sqlite3.connect("library.db")
 cursor = connection.cursor()
 
 class Book:
-    def __init__(self, ISBN, title, author, yearPublished, publisher):
+    def __init__(self, ISBN, title, author, yearPublished, publisher, availability):
         self.ISBN = ISBN
         self.title = title
         self.author = author
         self.yearPublished = yearPublished
         self.publisher = publisher
+        self.availability = availability
 
 def getBookDetails(id):
     cursor.execute("SELECT * FROM books WHERE ISBN = ?", (id,))
@@ -21,7 +22,7 @@ def getBookDetails(id):
     return toBook(result)
 
 def toBook(sqlResult):
-    return Book(sqlResult[0], sqlResult[1], sqlResult[2], sqlResult[3], sqlResult[4])
+    return Book(sqlResult[0], sqlResult[1], sqlResult[2], sqlResult[3], sqlResult[4], sqlResult[5])
 
 def toTuple(book):
     return (book.ISBN, book.title, book.author, book.yearPublished, book.publisher)
@@ -60,7 +61,3 @@ def search(keyword = None, yearRange = None, page = 1):
         print(row)
         bookSearchResults.append(toBook(row))
     return bookSearchResults
-
-
-
-
