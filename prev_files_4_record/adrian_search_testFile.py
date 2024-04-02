@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-import models
+import book_manager
 
 root = Tk()
 root.title('Book Details')

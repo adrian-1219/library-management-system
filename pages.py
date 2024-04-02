@@ -1,7 +1,9 @@
+import random
+import sqlite3
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 from account_manager import RegisterFunction
-import models, datetime
+import book_manager, datetime
 
 
 class StartPage(tk.Frame):
@@ -19,20 +21,24 @@ class RegisterPage(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         tk.Label(self, text="Register").place(relx=0.5, rely=0.2, anchor="center")
+
+        # a button to go back to the start page on the top left corner
+        ttk.Button(self, text="Back", command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
+
         username_label = tk.Label(self, text="Username")
-        username_label.place(relx=0.4, rely=0.3, anchor="e")
+        username_label.place(relx=0.45, rely=0.3, anchor="e")
         self.username_entry = ttk.Entry(self)
-        self.username_entry.place(relx=0.4, rely=0.3, anchor="w")
+        self.username_entry.place(relx=0.45, rely=0.3, anchor="w")
 
         password_label = tk.Label(self, text="Password")
-        password_label.place(relx=0.4, rely=0.4, anchor="e")
+        password_label.place(relx=0.45, rely=0.4, anchor="e")
         self.password_entry = ttk.Entry(self, show="*")
-        self.password_entry.place(relx=0.4, rely=0.4, anchor="w")
+        self.password_entry.place(relx=0.45, rely=0.4, anchor="w")
 
         verify_password_label = tk.Label(self, text="Verify Password")
-        verify_password_label.place(relx=0.4, rely=0.5, anchor="e")
+        verify_password_label.place(relx=0.45, rely=0.5, anchor="e")
         self.verify_password_entry = ttk.Entry(self, show="*")
-        self.verify_password_entry.place(relx=0.4, rely=0.5, anchor="w")
+        self.verify_password_entry.place(relx=0.45, rely=0.5, anchor="w")
 
         ttk.Button(self, text="Submit",
                    command=self.register).place(relx=0.5, rely=0.6, anchor="center")
@@ -56,7 +62,6 @@ class RegisterPage(tk.Frame):
                 self.username_entry.delete(0, tk.END)
                 self.password_entry.delete(0, tk.END)
                 self.controller.show_frame("HomePage")
-            # Your registration logic here
 
 
 class LoginPage(tk.Frame):
@@ -68,32 +73,87 @@ class LoginPage(tk.Frame):
 
         username_label = tk.Label(self, text="Username: ")
         username_label.place(relx=0.45, rely=0.4, anchor="e")
-        username_entry = ttk.Entry(self)
-        username_entry.place(relx=0.45, rely=0.4, anchor="w")
+        self.username_entry = ttk.Entry(self)
+        self.username_entry.place(relx=0.45, rely=0.4, anchor="w")
 
         password_label = tk.Label(self, text="Password: ")
         password_label.place(relx=0.45, rely=0.5, anchor="e")
-        password_entry = ttk.Entry(self, show="*")
-        password_entry.place(relx=0.45, rely=0.5, anchor="w")
+        self.password_entry = ttk.Entry(self, show="*")
+        self.password_entry.place(relx=0.45, rely=0.5, anchor="w")
 
         ttk.Button(self, text="Login",
-                   command=lambda: controller.show_frame("HomePage")).place(relx=0.5, rely=0.6, anchor="center")
+                   command=self.attempt_login).place(relx=0.5, rely=0.6, anchor="center")
 
-    # Login logic here
+    def attempt_login(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        if self.check_password(username, password):
+            messagebox.showinfo("Login Successful", "You have successfully logged in.")
+            self.controller.show_frame("HomePage")
+        else:
+            messagebox.showerror("Login Failed", "Incorrect username or password.")
+
+    def check_password(self, username, password):
+        result = RegisterFunction.check_username(username)
+        if result and result[1] == password:
+            self.controller.current_account = username
+            return True
+        return False
+
+    def logout(self):
+        self.controller.current_account = None
+        messagebox.showinfo("Logout Successful", "You have been logged out.")
+        self.controller.show_frame("StartPage")
 
 
 class HomePage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-
-        tk.Label(self, text="Welcome to the Library", font=("Helvetica", 20)).place(relx=0.5, rely=0.3, anchor="center")
+        tk.Label(self, text="Welcome to the Library", font=("Helvetica", 25, "bold")).place(relx=0.5, rely=0.3, anchor="center")
         self.toolbar = CustomToolbar(self, controller)
         self.toolbar.pack(side="top", fill="x")
 
-        # Example of a logout button to return to the StartPage
-        ttk.Button(self, text="Logout",
-                   command=lambda: controller.show_frame("StartPage")).place(relx=0.5, rely=0.5, anchor="center")
+        self.books_frame = tk.Frame(self)
+        self.books_frame.pack(expand=True, fill="both", padx=20, pady=20)
+
+        self.display_books()
+        # ttk.Button(self, text="Logout",
+        #            command=lambda: controller.show_frame("StartPage")).place(relx=0.5, rely=0.5, anchor="center")
+
+        # a function to display random 10 books from the database
+    def display_books(self):
+        all_books = book_manager.search()  # Assuming this fetches all books
+        random_books = random.sample(all_books, min(len(all_books), 10))
+        tk.Label(self.books_frame, text="   Books of The Day", font=("Helvetica", 20, "bold"), anchor="w").pack(fill="x", pady=(10, 20))
+
+        for book in random_books:
+            book_btn = ttk.Button(self.books_frame, text=f"•  {book.title} by {book.author} ({book.yearPublished})",
+                                  style='Link.TButton',
+                                  command=lambda b=book: self.show_book_info(b))
+            book_btn.pack(fill='x', padx=20, pady=5)
+
+    def show_book_info(self, book):
+        self.controller.show_book("BookDetailsPage", book)
+
+
+class BookDetailsPage(tk.Frame):
+    def __init__(self, parent, controller, book):
+        super().__init__(parent)
+        self.controller = controller
+        self.book = book
+        self.toolbar = CustomToolbar(self, controller)
+        self.toolbar.pack(side="top", fill="x")
+
+        tk.Label(self, text="Book Details", font=("Helvetica", 20, "bold")).pack(pady=10)
+
+        # Display book information
+        tk.Label(self, text=f"Title: {self.book.title}", font=("Helvetica", 16)).pack()
+        tk.Label(self, text=f"Author: {self.book.author}", font=("Helvetica", 16)).pack()
+        tk.Label(self, text=f"ISBN: {self.book.ISBN}", font=("Helvetica", 16)).pack()
+        tk.Label(self, text=f"Year Published: {self.book.yearPublished}", font=("Helvetica", 16)).pack()
+        tk.Label(self, text=f"Publisher: {self.book.publisher}", font=("Helvetica", 16)).pack()
+
 
 
 class SearchPage(tk.Frame):
@@ -175,7 +235,7 @@ class SearchPage(tk.Frame):
         yearRange = [yearStart, yearEnd]
         if str(yearStart) == "Any" and str(yearEnd) == "Any":
             yearRange = None
-        self.pageResults = models.search(keyword, yearRange, self.page)
+        self.pageResults = book_manager.search(keyword, yearRange, self.page)
         self.displayResults()
 
         # Set page controls
@@ -183,7 +243,7 @@ class SearchPage(tk.Frame):
             self.prevPageBtn["state"] = "disabled"
         else:
             self.prevPageBtn["state"] = "normal"
-        if models.search(keyword, yearRange, self.page + 1):
+        if book_manager.search(keyword, yearRange, self.page + 1):
             self.nextPageBtn["state"] = "normal"
         else:
             self.nextPageBtn["state"] = "disabled"
@@ -215,75 +275,78 @@ class BorrowedBooksPage(tk.Frame):
 
 
 class AccountPage(tk.Frame):
+    # wait for account_manager.py to be implemented first
+
     # Placeholder for AccountPage and Borrowed books details go in this page
-    def __init__(self, parent, controller, username):
-        tk.Frame.__init__(self, parent)
-        self.controller = controller
-        self.username = username
-
-        tk.Label(self, text="Account Page", font=("Helvetica", 20)).place(relx=0.5, rely=0.1, anchor="center")
-        tk.Label(self, text="Username:").place(relx=0.3, rely=0.3, anchor="e")
-        tk.Label(self, text=username).place(relx=0.35, rely=0.3, anchor="w")
-
-        tk.Label(self, text="Password:").place(relx=0.3, rely=0.4, anchor="e")
-        password = self.get_password(username)
-        tk.Label(self, text=password).place(relx=0.35, rely=0.4, anchor="w")
-
-        ttk.Button(self, text="Modify Username", command=self.modify_username).place(relx=0.5, rely=0.5,
-                                                                                     anchor="center")
-        ttk.Button(self, text="Modify Password", command=self.modify_password).place(relx=0.5, rely=0.6,
-                                                                                     anchor="center")
-        ttk.Button(self, text="Modify Email", command=self.modify_email).place(relx=0.5, rely=0.7,
-                                                                               anchor="center")
-        ttk.Button(self, text="Logout", command=self.logout).place(relx=0.5, rely=0.8, anchor="center")
-
-    def get_password(self, username):
-        conn = sqlite3.connect('account.db')
-        c = conn.cursor()
-        c.execute("SELECT password FROM account WHERE username = ?", (username,))
-        result = c.fetchone()
-        conn.close()
-        return result[0] if result else ""
-
-    def modify_username(self):
-        new_username = simpledialog.askstring("Input", "Enter new username:", parent=self)
-        if new_username:
-            result = RegisterFunction.check_username(new_username)
-            if result:
-                messagebox.showinfo('Error', 'Username already exists')
-            else:
-                conn = sqlite3.connect('account.db')
-                c = conn.cursor()
-                c.execute("UPDATE account SET username = ? WHERE username = ?", (new_username, self.username))
-                conn.commit()
-                conn.close()
-                messagebox.showinfo('Success', 'Username modified successfully')
-                self.controller.show_frame(AccountPage, new_username)
-
-    def modify_password(self):
-        new_password = simpledialog.askstring("Input", "Enter new password:", parent=self)
-        if new_password:
-            conn = sqlite3.connect('account.db')
-            c = conn.cursor()
-            c.execute("UPDATE account SET password = ? WHERE username = ?", (new_password, self.username))
-            conn.commit()
-            conn.close()
-            messagebox.showinfo('Success', 'Password modified successfully')
-
-    def modify_email(self):
-        new_email = simpledialog.askstring("Input", "Enter new email:", parent=self)
-        if new_email:
-            conn = sqlite3.connect('account.db')
-            c = conn.cursor()
-            c.execute("UPDATE account SET email = ? WHERE username = ?", (new_email, self.username))
-            conn.commit()
-            conn.close()
-            messagebox.showinfo('Success', 'Email modified successfully')
-
-    def logout(self):
-        RegisterFunction.delete_account(self.username)
-        messagebox.showinfo('Success', 'Account deleted successfully')
-        self.controller.show_frame(StartPage)
+    # def __init__(self, parent, controller, username):
+    #     tk.Frame.__init__(self, parent)
+    #     self.controller = controller
+    #     self.username = username
+    #
+    #     tk.Label(self, text="Account Page", font=("Helvetica", 20)).place(relx=0.5, rely=0.1, anchor="center")
+    #     tk.Label(self, text="Username:").place(relx=0.3, rely=0.3, anchor="e")
+    #     tk.Label(self, text=username).place(relx=0.35, rely=0.3, anchor="w")
+    #
+    #     tk.Label(self, text="Password:").place(relx=0.3, rely=0.4, anchor="e")
+    #     password = self.get_password(username)
+    #     tk.Label(self, text=password).place(relx=0.35, rely=0.4, anchor="w")
+    #
+    #     ttk.Button(self, text="Modify Username", command=self.modify_username).place(relx=0.5, rely=0.5,
+    #                                                                                  anchor="center")
+    #     ttk.Button(self, text="Modify Password", command=self.modify_password).place(relx=0.5, rely=0.6,
+    #                                                                                  anchor="center")
+    #     ttk.Button(self, text="Modify Email", command=self.modify_email).place(relx=0.5, rely=0.7,
+    #                                                                            anchor="center")
+    #     ttk.Button(self, text="Logout", command=self.logout).place(relx=0.5, rely=0.8, anchor="center")
+    #
+    # def get_password(self, username):
+    #     conn = sqlite3.connect('account.db')
+    #     c = conn.cursor()
+    #     c.execute("SELECT password FROM account WHERE username = ?", (username,))
+    #     result = c.fetchone()
+    #     conn.close()
+    #     return result[0] if result else ""
+    #
+    # def modify_username(self):
+    #     new_username = simpledialog.askstring("Input", "Enter new username:", parent=self)
+    #     if new_username:
+    #         result = RegisterFunction.check_username(new_username)
+    #         if result:
+    #             messagebox.showinfo('Error', 'Username already exists')
+    #         else:
+    #             conn = sqlite3.connect('account.db')
+    #             c = conn.cursor()
+    #             c.execute("UPDATE account SET username = ? WHERE username = ?", (new_username, self.username))
+    #             conn.commit()
+    #             conn.close()
+    #             messagebox.showinfo('Success', 'Username modified successfully')
+    #             self.controller.show_frame(AccountPage, new_username)
+    #
+    # def modify_password(self):
+    #     new_password = simpledialog.askstring("Input", "Enter new password:", parent=self)
+    #     if new_password:
+    #         conn = sqlite3.connect('account.db')
+    #         c = conn.cursor()
+    #         c.execute("UPDATE account SET password = ? WHERE username = ?", (new_password, self.username))
+    #         conn.commit()
+    #         conn.close()
+    #         messagebox.showinfo('Success', 'Password modified successfully')
+    #
+    # def modify_email(self):
+    #     new_email = simpledialog.askstring("Input", "Enter new email:", parent=self)
+    #     if new_email:
+    #         conn = sqlite3.connect('account.db')
+    #         c = conn.cursor()
+    #         c.execute("UPDATE account SET email = ? WHERE username = ?", (new_email, self.username))
+    #         conn.commit()
+    #         conn.close()
+    #         messagebox.showinfo('Success', 'Email modified successfully')
+    #
+    # def logout(self):
+    #     RegisterFunction.delete_account(self.username)
+    #     messagebox.showinfo('Success', 'Account deleted successfully')
+    #     self.controller.show_frame(StartPage)
+    pass
 
 class RecommendPage(tk.Frame):
     # for books suggestions based on user's borrowing history
