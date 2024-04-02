@@ -10,7 +10,6 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-
         tk.Label(self, text="Library Management System", font=("Helvetica", 30)).place(relx=0.5, rely=0.2, anchor="center")
         ttk.Button(self, text="Register", command=lambda: controller.show_frame("RegisterPage")).place(relx=0.5, rely=0.4, anchor="center")
         ttk.Button(self, text="Login", command=lambda: controller.show_frame("LoginPage")).place(relx=0.5, rely=0.5, anchor="center")
@@ -44,32 +43,42 @@ class RegisterPage(tk.Frame):
                    command=self.register).place(relx=0.5, rely=0.6, anchor="center")
 
     def register(self):
+        """this function will register the user into the database and check if the username already exists or not"""
         username = self.username_entry.get()
         password = self.password_entry.get()
         v_password = self.verify_password_entry.get()
 
         if username == '' or password == '':
+            # if the username or password is empty, it will show an error message
             messagebox.showinfo('Error', 'Please enter username and password')
         elif password != v_password:
+            # if the password and verify password is not the same, it will show an error message
             messagebox.showinfo('Error', 'Please check the password')
         else:
+            # if the username is already in the database, it will show an error message
             result = RegisterFunction.check_username(username)
             if result:
                 messagebox.showinfo('Error', 'Username already exists')
             else:
-                RegisterFunction.insert_account(username, password)  # Use class name to call static method
+                # if the username is not in the database, it will register the user into the database
+                RegisterFunction.insert_account(username, password)
                 messagebox.showinfo('Success', 'Account registered successfully')
+                # it will clear the entry boxes
                 self.username_entry.delete(0, tk.END)
                 self.password_entry.delete(0, tk.END)
                 self.controller.show_frame("HomePage")
 
 
 class LoginPage(tk.Frame):
+    """This is the login page of the library management system. It will allow the user to login to the system."""
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         controller.add_menu(self)
         tk.Label(self, text="Login").place(relx=0.5, rely=0.3, anchor="center")
+
+        # a button to go back to the start page on the top left corner
+        ttk.Button(self, text="Back", command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
 
         username_label = tk.Label(self, text="Username: ")
         username_label.place(relx=0.45, rely=0.4, anchor="e")
@@ -85,8 +94,11 @@ class LoginPage(tk.Frame):
                    command=self.attempt_login).place(relx=0.5, rely=0.6, anchor="center")
 
     def attempt_login(self):
+        """this function will check if the username and password is correct or not"""
+        # get the current username and password
         username = self.username_entry.get()
         password = self.password_entry.get()
+        # call the check_password function
         if self.check_password(username, password):
             messagebox.showinfo("Login Successful", "You have successfully logged in.")
             self.controller.show_frame("HomePage")
@@ -95,26 +107,33 @@ class LoginPage(tk.Frame):
             messagebox.showerror("Login Failed", "Incorrect username or password.")
 
     def check_password(self, username, password):
+        # check if the username is in the database
         result = RegisterFunction.check_username(username)
+        # if the username is in the database, it will check if the password is correct or not
         if result and result[1] == password:
             self.controller.current_account = username
             return True
         return False
 
     def logout(self):
+        # this function will log out the user and return to the start page
+        # set the current account to None
         self.controller.current_account = None
         messagebox.showinfo("Logout Successful", "You have been logged out.")
         self.controller.show_frame("StartPage")
 
 
 class HomePage(tk.Frame):
+    """This is the home page of the library management system. It will display the books of the day and the toolbar."""
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
         tk.Label(self, text="Welcome to the Library", font=("Helvetica", 25, "bold")).place(relx=0.5, rely=0.3, anchor="center")
+        # put the toolbar on the top of the page
         self.toolbar = CustomToolbar(self, controller)
         self.toolbar.pack(side="top", fill="x")
 
+        # a frame to display the books
         self.books_frame = tk.Frame(self)
         self.books_frame.pack(expand=True, fill="both", padx=20, pady=20)
 
@@ -122,10 +141,15 @@ class HomePage(tk.Frame):
         # ttk.Button(self, text="Logout",
         #            command=lambda: controller.show_frame("StartPage")).place(relx=0.5, rely=0.5, anchor="center")
 
-        # a function to display random 10 books from the database
+        # a function to display random 10 books from the database (note: changed to display a random page
+        # and a random entry for the random books
     def display_books(self):
-        all_books = book_manager.search()  # Assuming this fetches all books
-        random_books = random.sample(all_books, min(len(all_books), 10))
+        # get all the books from the database
+        # all_books = book_manager.search()
+        # random_books = random.sample(all_books, min(len(all_books), 10))
+
+        # get random books from the database by choosing a random page and a random entry
+        random_books = book_manager.search(page=random.randint(1, 20))
         tk.Label(self.books_frame, text="   Books of The Day", font=("Helvetica", 20, "bold"), anchor="w").pack(fill="x", pady=(10, 20))
 
         for book in random_books:
@@ -135,10 +159,13 @@ class HomePage(tk.Frame):
             book_btn.pack(fill='x', padx=20, pady=5)
 
     def show_book_info(self, book):
+        # invoke the show_book function in the controller to tkraise the BookDetailsPage
         self.controller.show_book("BookDetailsPage", book)
 
 
 class BookDetailsPage(tk.Frame):
+    """This page will display the details of a book. It will show the title,
+    author, year published, publisher, and ISBN. Allowing the user to borrow or return the book in this page"""
     def __init__(self, parent, controller, book):
         super().__init__(parent)
         self.controller = controller
@@ -151,9 +178,12 @@ class BookDetailsPage(tk.Frame):
         # Display book information
         self.displayBookDetails()
 
+        # check the current username logged in and try to display in the top left corner for later use
         print(self.controller.username)
 
         # Borrow or return button
+        # ------------------this need to be updated (maybe only show the return button if its
+        # borrowed instead of replacing it?-------------------------------------------
         if borrow_manager.borrowed(self.controller.username, self.book.ISBN):
             self.borrowReturnBtn = tk.Button(self, text="Return", command=self.returnBook)
             self.borrowReturnBtn.pack()
@@ -162,6 +192,7 @@ class BookDetailsPage(tk.Frame):
             self.borrowReturnBtn.pack()
 
     def displayBookDetails(self):
+        """Display book details on the page"""
         self.titleLabel = tk.Label(self, text=f"Title: {self.book.title}", font=("Helvetica", 16))
         self.authorLabel = tk.Label(self, text=f"Author: {self.book.author}", font=("Helvetica", 16))
         self.ISBNLabel = tk.Label(self, text=f"ISBN: {self.book.ISBN}", font=("Helvetica", 16))
@@ -176,6 +207,7 @@ class BookDetailsPage(tk.Frame):
         self.availabilityLabel.pack()
 
     def clearBookDetails(self):
+        """Clear book details from the page"""
         self.titleLabel.pack_forget()
         self.authorLabel.pack_forget()
         self.ISBNLabel.pack_forget()
@@ -184,12 +216,13 @@ class BookDetailsPage(tk.Frame):
         self.availabilityLabel.pack_forget()
 
     def returnBook(self):
+        """Return the book and update the page"""
         borrow_manager.returnBook(self.controller.username, self.book.ISBN)
         # refresh details
         self.book = book_manager.getBookDetails(self.book.ISBN)
         self.clearBookDetails()
         self.displayBookDetails()
-        # change button
+        # change button (or maybe just hide the button if it's returned?, or show a message that it's returned)
         self.borrowReturnBtn.pack_forget()
         self.borrowReturnBtn = tk.Button(self, text="Borrow", command=self.borrowBook)
         self.borrowReturnBtn.pack()
@@ -207,6 +240,7 @@ class BookDetailsPage(tk.Frame):
 
 
 class SearchPage(tk.Frame):
+    """This page will allow the user to search for books by title, author, year, or publisher."""
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -274,11 +308,13 @@ class SearchPage(tk.Frame):
         self.detailsBtn.pack(side="left")
 
     def newSearch(self):
+        """Reset page and search for books based on the search"""
         self.page = 1 
         self.pageVar.set(str(self.page))
         self.search()
 
     def search(self):
+        """Search for books based on the search criteria and display the results."""
         keyword = self.search_var.get()
         yearStart = self.yearStartCombobox.get()
         yearEnd = self.yearEndCombobox.get()
@@ -309,6 +345,7 @@ class SearchPage(tk.Frame):
         self.search()
 
     def displayResults(self):
+        """Display search results in the treeview."""
         self.treeview.delete(*self.treeview.get_children())
         for result in self.pageResults:
             self.treeview.insert(
@@ -320,14 +357,16 @@ class SearchPage(tk.Frame):
     
     def goToBookDetails(self):
         curItem = self.treeview.item(self.treeview.focus())
-        print("focus(): ", self.treeview.focus())
-        print(curItem)
+        # print("focus(): ", self.treeview.focus())
+        # print(curItem)
         if curItem["text"]:
             book = book_manager.getBookDetails(curItem["text"])
             self.controller.show_book("BookDetailsPage", book)
 
 
 class BorrowedBooksPage(tk.Frame):
+    """This page will display the books that the user has borrowed. It will show the title,
+    author, date borrowed, and status."""
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -370,8 +409,8 @@ class BorrowedBooksPage(tk.Frame):
         self.detailsBtn.pack(side="left")
 
         self.pageResults = borrow_manager.getBorrowHistory(self.controller.username, self.page)
-        print(self.controller.username, self.page)
-        print(self.pageResults)
+        # print(self.controller.username, self.page)
+        # print(self.pageResults)
         self.displayResults()
 
     def nextPage(self):
@@ -429,6 +468,7 @@ class BorrowedBooksPage(tk.Frame):
 
 class AccountPage(tk.Frame):
     # wait for account_manager.py to be implemented first
+    # second option: update the account info in this class
 
     # Placeholder for AccountPage and Borrowed books details go in this page
     # def __init__(self, parent, controller, username):
@@ -507,6 +547,8 @@ class RecommendPage(tk.Frame):
 
 
 class CustomToolbar(tk.Frame):
+    """This is a custom toolbar that will be displayed on the top of the page.
+    It will have the home button, account menu,"""
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
@@ -538,7 +580,9 @@ class CustomToolbar(tk.Frame):
         accessibility_menu.pack(side="right", padx=10)
 
     def change_font(self):
+        # change font size larger or smaller
         pass
 
     def change_colour(self):
+        # for accessibility, change the colour of the text for better readability
         pass

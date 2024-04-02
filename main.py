@@ -12,9 +12,14 @@ class App(tk.Tk):
         self.container.pack(expand=True, fill="both", padx=20, pady=20)
 
         self.username = None
-
         self.frames = {}
 
+        # # set a single font to be used throughout the app
+        # self.title_font = tkfont.Font(
+        #     family='Helvetica', size=18, weight="bold", slant="italic")
+
+        # Create all the pages, this needs to be updated
+        # for each other custom Frame class you make, you could add it to this tuple
         for F in (StartPage, RegisterPage, LoginPage, HomePage, SearchPage):
             frame = F(parent=self.container, controller=self)
             self.frames[F.__name__] = frame  # Use class name as string for key
@@ -23,6 +28,7 @@ class App(tk.Tk):
         self.show_frame("StartPage")  # Reference frames using class names as strings
 
     def show_frame(self, cont):
+        '''Show a frame for the given page name'''
         frame = self.frames[cont]
         frame.tkraise()
 
