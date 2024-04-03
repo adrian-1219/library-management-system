@@ -2,6 +2,9 @@ import random
 import sqlite3
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
+from PIL import Image, ImageTk
+from tkinter.font import Font
+
 
 import requests
 
@@ -10,47 +13,86 @@ import book_manager, datetime, borrow_manager
 
 
 class StartPage(tk.Frame):
-    """This is the start page of the library management system. It will allow the user to register or login."""
+    """This is the start page of the library management system. It will allow the user to register or login.
+    background image from: https://www.google.ca/imgres?imgurl=https://c4.wallpaperflare.com/wallpaper/479/101/113/germany-saxony-gorlitz-hall-historical-literature-wallpaper-preview.jpg&tbnid=ZhqeeBVaHxzzJM&vet=1&imgrefurl=https://www.wallpaperflare.com/search?wallpaper%3Dlibrary&docid=Uu-4mrzVh9DQcM&w=728&h=410"""
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        tk.Label(self, text="Library Management System", font=("Helvetica", 30)).place(relx=0.5, rely=0.2, anchor="center")
-        ttk.Button(self, text="Register", command=lambda: controller.show_frame("RegisterPage")).place(relx=0.5, rely=0.4, anchor="center")
-        ttk.Button(self, text="Login", command=lambda: controller.show_frame("LoginPage")).place(relx=0.5, rely=0.5, anchor="center")
+
+        canvas = tk.Canvas(self, width=1280, height=680, highlightthickness=0)
+        canvas.pack(fill='both', expand=True)
+        
+        # background image
+        self.start_image = Image.open("assets/start.png")
+        self.resized_start_image = self.start_image.resize((1280, 680), Image.Resampling.LANCZOS)
+        self.start_background = ImageTk.PhotoImage(self.resized_start_image)
+        canvas.create_image(640, 340, image=self.start_background)
+
+        # draw text
+        canvas.create_text(640, 200, text="Library Management System", font="Helvetica 30 bold", fill="white")
+
+        style = ttk.Style()
+
+        # change to 'aqua' for originally sytled buttons
+        style.theme_use('alt')
+        style.configure('Transparent.TButton', borderwidth=0, padding=0)
+
+        ttk.Button(self, text="Register", style='Transparent.TButton', command=lambda: controller.show_frame("RegisterPage")).place(relx=0.5, rely=0.4, anchor="center")
+        ttk.Button(self, text="Login", style='Transparent.TButton', command=lambda: controller.show_frame("LoginPage")).place(relx=0.5, rely=0.5, anchor="center")
+
 
 
 class RegisterPage(tk.Frame):
-    """This is the register page of the library management system. It will allow the user to register to the system."""
+    """This is the register page of the library management system. It will allow the user to register to the system.
+    background image from: https://blog.theadl.com/2018/07/06/digital-libraries-from-keepers-to-communicators/"""
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        tk.Label(self, text="Register").place(relx=0.5, rely=0.2, anchor="center")
+        # tk.Label(self, text="Register").place(relx=0.5, rely=0.2, anchor="center")
+
+        canvas = tk.Canvas(self, width=1280, height=680, highlightthickness=0)
+        canvas.pack(fill='both', expand=True)
+        
+        # background 
+        self.register_image = Image.open("assets/login-register.png")
+        self.resized_register_image = self.register_image.resize((1280, 680), Image.Resampling.LANCZOS)
+        self.register_background = ImageTk.PhotoImage(self.resized_register_image)
+        canvas.create_image(640, 340, image=self.register_background)
+        # draw text
+        canvas.create_text(640, 200, text="Register", font="Helvetica 30 bold", fill="white")
+        # configure style 
+        style = ttk.Style()
+        # change to 'aqua' for originally sytled buttons
+        style.theme_use('alt')
+        style.configure('Transparent.TButton', borderwidth=0, padding=0)
 
         # a button to go back to the start page on the top left corner
-        ttk.Button(self, text="Back", command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
+        ttk.Button(self, text="Back", style='Transparent.TButton', command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
+
 
         # entry boxes for the username, password, and verify password
         username_label = tk.Label(self, text="Username")
-        username_label.place(relx=0.45, rely=0.3, anchor="e")
+        username_label.place(relx=0.45, rely=0.4, anchor="e")
         self.username_entry = ttk.Entry(self)
-        self.username_entry.place(relx=0.45, rely=0.3, anchor="w")
+        self.username_entry.place(relx=0.45, rely=0.4, anchor="w")
 
         password_label = tk.Label(self, text="Password")
-        password_label.place(relx=0.45, rely=0.4, anchor="e")
+        password_label.place(relx=0.45, rely=0.5, anchor="e")
         # show the password as asterisks
         self.password_entry = ttk.Entry(self, show="*")
-        self.password_entry.place(relx=0.45, rely=0.4, anchor="w")
+        self.password_entry.place(relx=0.45, rely=0.5, anchor="w")
 
         verify_password_label = tk.Label(self, text="Verify Password")
-        verify_password_label.place(relx=0.45, rely=0.5, anchor="e")
+        verify_password_label.place(relx=0.45, rely=0.6, anchor="e")
         self.verify_password_entry = ttk.Entry(self, show="*")
-        self.verify_password_entry.place(relx=0.45, rely=0.5, anchor="w")
+        self.verify_password_entry.place(relx=0.45, rely=0.6, anchor="w")
 
-        ttk.Button(self, text="Submit",
-                   command=self.register).place(relx=0.5, rely=0.6, anchor="center")
+        ttk.Button(self, text="Submit", style='Transparent.TButton',
+                   command=self.register).place(relx=0.5, rely=0.7, anchor="center")
 
     def register(self):
-        """this function will register the user into the database and check if the username already exists or not"""
+        """this function will register the user into the database and check if the username already exists or not
+        background image from: https://blog.theadl.com/2018/07/06/digital-libraries-from-keepers-to-communicators/"""
         username = self.username_entry.get()
         password = self.password_entry.get()
         v_password = self.verify_password_entry.get()
@@ -82,10 +124,29 @@ class LoginPage(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         controller.add_menu(self)
-        tk.Label(self, text="Login").place(relx=0.5, rely=0.3, anchor="center")
+
+        canvas = tk.Canvas(self, width=1280, height=680, highlightthickness=0)
+        canvas.pack(fill='both', expand=True)
+        
+        # background 
+        self.login_image = Image.open("assets/login-register.png")
+        self.resized_login_image = self.login_image.resize((1280, 680), Image.Resampling.LANCZOS)
+        self.login_background = ImageTk.PhotoImage(self.resized_login_image)
+        canvas.create_image(640, 340, image=self.login_background)
+        # draw text
+        canvas.create_text(640, 200, text="Login", font="Helvetica 30 bold", fill="white")
+        # configure style 
+        style = ttk.Style()
+        # change to 'aqua' for originally sytled buttons
+        style.theme_use('alt')
+        style.configure('Transparent.TButton', borderwidth=0, padding=0)
+
+
+
+        # tk.Label(self, text="Login").place(relx=0.5, rely=0.3, anchor="center")
 
         # a button to go back to the start page on the top left corner
-        ttk.Button(self, text="Back", command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
+        ttk.Button(self, text="Back", style='Transparent.TButton', command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
 
         username_label = tk.Label(self, text="Username: ")
         username_label.place(relx=0.45, rely=0.4, anchor="e")
@@ -97,7 +158,7 @@ class LoginPage(tk.Frame):
         self.password_entry = ttk.Entry(self, show="*")
         self.password_entry.place(relx=0.45, rely=0.5, anchor="w")
 
-        ttk.Button(self, text="Login",
+        ttk.Button(self, text="Login", style='Transparent.TButton', 
                    command=self.attempt_login).place(relx=0.5, rely=0.6, anchor="center")
 
     def attempt_login(self):
@@ -135,7 +196,7 @@ class HomePage(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
-        tk.Label(self, text="Welcome to the Library", font=("Helvetica", 25, "bold")).place(relx=0.5, rely=0.3, anchor="center")
+
         # put the toolbar on the top of the page
         self.toolbar = CustomToolbar(self, controller)
         self.toolbar.pack(side="top", fill="x")
@@ -373,6 +434,8 @@ class SearchPage(tk.Frame):
         self.detailsBtn = tk.Button(pageContainer, text="Details", command=self.goToBookDetails)
         self.detailsBtn.pack(side="left")
 
+
+
     def newSearch(self):
         """Reset page and search for books based on the search"""
         self.page = 1 
@@ -537,75 +600,86 @@ class AccountPage(tk.Frame):
     # second option: update the account info in this class
 
     # Placeholder for AccountPage and Borrowed books details go in this page
-    # def __init__(self, parent, controller, username):
-    #     tk.Frame.__init__(self, parent)
-    #     self.controller = controller
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.controller = controller
+        self.toolbar = CustomToolbar(self, controller)
+        self.toolbar.pack(side="top", fill="x")
+        # self.username = None
+    
+        tk.Label(self, text="Account Page", font=("Helvetica", 20)).place(relx=0.5, rely=0.1, anchor="center")
+        tk.Label(self, text="Username:").place(relx=0.3, rely=0.3, anchor="e")
+        # tk.Label(self, text=self.username).place(relx=0.35, rely=0.3, anchor="w")
+    
+        tk.Label(self, text="Password:").place(relx=0.3, rely=0.4, anchor="e")
+        # password = self.get_password(self.username)
+        # tk.Label(self, text=password).place(relx=0.35, rely=0.4, anchor="w")
+    
+        ttk.Button(self, text="Modify Username", command=self.modify_username).place(relx=0.5, rely=0.5,
+                                                                                     anchor="center")
+        ttk.Button(self, text="Modify Password", command=self.modify_password).place(relx=0.5, rely=0.6,
+                                                                                     anchor="center")
+        ttk.Button(self, text="Modify Email", command=self.modify_email).place(relx=0.5, rely=0.7,
+                                                                               anchor="center")
+        ttk.Button(self, text="Logout", command=self.logout).place(relx=0.5, rely=0.8, anchor="center")
+
+
+    
+    # def set_username(self, username):
     #     self.username = username
-    #
-    #     tk.Label(self, text="Account Page", font=("Helvetica", 20)).place(relx=0.5, rely=0.1, anchor="center")
-    #     tk.Label(self, text="Username:").place(relx=0.3, rely=0.3, anchor="e")
-    #     tk.Label(self, text=username).place(relx=0.35, rely=0.3, anchor="w")
-    #
-    #     tk.Label(self, text="Password:").place(relx=0.3, rely=0.4, anchor="e")
-    #     password = self.get_password(username)
-    #     tk.Label(self, text=password).place(relx=0.35, rely=0.4, anchor="w")
-    #
-    #     ttk.Button(self, text="Modify Username", command=self.modify_username).place(relx=0.5, rely=0.5,
-    #                                                                                  anchor="center")
-    #     ttk.Button(self, text="Modify Password", command=self.modify_password).place(relx=0.5, rely=0.6,
-    #                                                                                  anchor="center")
-    #     ttk.Button(self, text="Modify Email", command=self.modify_email).place(relx=0.5, rely=0.7,
-    #                                                                            anchor="center")
-    #     ttk.Button(self, text="Logout", command=self.logout).place(relx=0.5, rely=0.8, anchor="center")
-    #
-    # def get_password(self, username):
-    #     conn = sqlite3.connect('account.db')
-    #     c = conn.cursor()
-    #     c.execute("SELECT password FROM account WHERE username = ?", (username,))
-    #     result = c.fetchone()
-    #     conn.close()
-    #     return result[0] if result else ""
-    #
-    # def modify_username(self):
-    #     new_username = simpledialog.askstring("Input", "Enter new username:", parent=self)
-    #     if new_username:
-    #         result = RegisterFunction.check_username(new_username)
-    #         if result:
-    #             messagebox.showinfo('Error', 'Username already exists')
-    #         else:
-    #             conn = sqlite3.connect('account.db')
-    #             c = conn.cursor()
-    #             c.execute("UPDATE account SET username = ? WHERE username = ?", (new_username, self.username))
-    #             conn.commit()
-    #             conn.close()
-    #             messagebox.showinfo('Success', 'Username modified successfully')
-    #             self.controller.show_frame(AccountPage, new_username)
-    #
-    # def modify_password(self):
-    #     new_password = simpledialog.askstring("Input", "Enter new password:", parent=self)
-    #     if new_password:
-    #         conn = sqlite3.connect('account.db')
-    #         c = conn.cursor()
-    #         c.execute("UPDATE account SET password = ? WHERE username = ?", (new_password, self.username))
-    #         conn.commit()
-    #         conn.close()
-    #         messagebox.showinfo('Success', 'Password modified successfully')
-    #
-    # def modify_email(self):
-    #     new_email = simpledialog.askstring("Input", "Enter new email:", parent=self)
-    #     if new_email:
-    #         conn = sqlite3.connect('account.db')
-    #         c = conn.cursor()
-    #         c.execute("UPDATE account SET email = ? WHERE username = ?", (new_email, self.username))
-    #         conn.commit()
-    #         conn.close()
-    #         messagebox.showinfo('Success', 'Email modified successfully')
-    #
-    # def logout(self):
-    #     RegisterFunction.delete_account(self.username)
-    #     messagebox.showinfo('Success', 'Account deleted successfully')
-    #     self.controller.show_frame(StartPage)
-    pass
+
+    def get_password(self, username):
+        conn = sqlite3.connect('account.db')
+        c = conn.cursor()
+        c.execute("SELECT password FROM account WHERE username = ?", (username,))
+        result = c.fetchone()
+        conn.close()
+        return result[0] if result else ""
+        pass
+    
+    def modify_username(self):
+        new_username = simpledialog.askstring("Input", "Enter new username:", parent=self)
+        if new_username:
+            result = RegisterFunction.check_username(new_username)
+            if result:
+                messagebox.showinfo('Error', 'Username already exists')
+            else:
+                conn = sqlite3.connect('account.db')
+                c = conn.cursor()
+                c.execute("UPDATE account SET username = ? WHERE username = ?", (new_username, self.username))
+                conn.commit()
+                conn.close()
+                messagebox.showinfo('Success', 'Username modified successfully')
+                self.controller.show_frame(AccountPage, new_username)
+        pass
+    
+    def modify_password(self):
+        new_password = simpledialog.askstring("Input", "Enter new password:", parent=self)
+        if new_password:
+            conn = sqlite3.connect('account.db')
+            c = conn.cursor()
+            c.execute("UPDATE account SET password = ? WHERE username = ?", (new_password, self.username))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo('Success', 'Password modified successfully')
+        pass
+    
+    def modify_email(self):
+        new_email = simpledialog.askstring("Input", "Enter new email:", parent=self)
+        if new_email:
+            conn = sqlite3.connect('account.db')
+            c = conn.cursor()
+            c.execute("UPDATE account SET email = ? WHERE username = ?", (new_email, self.username))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo('Success', 'Email modified successfully')
+        pass
+    
+    def logout(self):
+        RegisterFunction.delete_account(self.username)
+        messagebox.showinfo('Success', 'Account deleted successfully')
+        self.controller.show_frame(StartPage)
+
 
 class RecommendPage(tk.Frame):
     # for books suggestions based on user's borrowing history
@@ -614,11 +688,12 @@ class RecommendPage(tk.Frame):
 
 class CustomToolbar(tk.Frame):
     """This is a custom toolbar that will be displayed on the top of the page.
-    It will have the home button, account menu,"""
+    It will have the home button, account menu,
+    Search Button icon from: https://www.shareicon.net/loop-view-magnifier-zoom-search-eye-research-magnifying-glass-explore-magnifying-find-glass-82290"""
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-
+        
         self.search_icon = tk.PhotoImage(file="assets/search.png")
 
         # home page button
@@ -634,20 +709,90 @@ class CustomToolbar(tk.Frame):
         account_menu.menu.add_command(label="Log out", command=lambda: controller.show_frame("StartPage"))
         account_menu.pack(side="right", padx=10)
 
-        # Search Button
+        # Search Button 
         tk.Button(self, image=self.search_icon, command=lambda: controller.show_frame("SearchPage")).pack(side="right", padx=10)
 
         # Accessibility Menu
         accessibility_menu = tk.Menubutton(self, text="Accessibility", relief=tk.RAISED)
         accessibility_menu.menu = tk.Menu(accessibility_menu, tearoff=0)
         accessibility_menu["menu"] = accessibility_menu.menu
-        accessibility_menu.menu.add_command(label="Font", command=self.change_font)
-        accessibility_menu.menu.add_command(label="Colour", command=self.change_colour)
         accessibility_menu.pack(side="right", padx=10)
 
-    def change_font(self):
-        # change font size larger or smaller
-        pass
+        # Font Menu
+        font_menu = tk.Menu(accessibility_menu.menu, tearoff=0)
+        font_menu.add_command(label="Size Up", command=self.fontsize_up)
+        font_menu.add_command(label="Normal", command=self.reset_fontsize)
+        font_menu.add_command(label="Size Down", command=self.fontsize_down)
+        accessibility_menu.menu.add_cascade(label='Font', menu=font_menu, underline=0)
+
+        # Colour menu
+        accessibility_menu.menu.add_command(label="Colour", command=self.change_colour)
+               
+
+    def fontsize_up(self):
+        new_font = Font(family='Times New Roman', size=30)
+
+        # new font on tk.Label and tk.Button widgets
+        for widget in self.controller.walk_widgets():
+            if isinstance(widget, tk.Label) or isinstance(widget, tk.Button):
+                widget.config(font=new_font)
+            elif isinstance(widget, ttk.Entry) or isinstance(widget, tk.Text):
+                widget['font'] = new_font
+
+            # change style of ttk widgets
+            elif isinstance(widget, (ttk.Button, ttk.Label)):
+                style_name = 'TFont.TButton' if isinstance(widget, ttk.Button) else 'TFont.TLabel'
+                style = ttk.Style()
+                style.configure(style_name, font=new_font)
+                widget.configure(style=style_name)
+                style.configure('Treeview', font=new_font)
+                style.configure('Treeview.Heading', font=new_font)
+
+    def fontsize_down(self):
+        new_font = Font(family='Times New Roman', size=9)
+
+        # new font on tk.Label and tk.Button widgets
+        for widget in self.controller.walk_widgets():
+            if isinstance(widget, tk.Label) or isinstance(widget, tk.Button):
+                widget.config(font=new_font)
+            elif isinstance(widget, ttk.Entry) or isinstance(widget, tk.Text):
+                widget['font'] = new_font
+
+            # change style of ttk widgets
+            elif isinstance(widget, (ttk.Button, ttk.Label)):
+                style_name = 'TFont.TButton' if isinstance(widget, ttk.Button) else 'TFont.TLabel'
+                style = ttk.Style()
+                style.configure(style_name, font=new_font)
+                widget.configure(style=style_name)
+                style.configure('Treeview', font=new_font)
+                style.configure('Treeview.Heading', font=new_font)
+
+    def reset_fontsize(self):
+        normal_font = Font(size=13)
+        title_font = Font(size=20, weight='bold')
+        style = ttk.Style()
+
+        # styles for widgets
+        style.configure('TLabel', font=title_font)
+        style.configure('TButton', font=normal_font)
+
+
+        for widget in self.controller.walk_widgets():
+            if isinstance(widget, tk.Label):
+                # title font for labels
+                widget.config(font=title_font)
+            elif isinstance(widget, (tk.Button, tk.Entry)):
+                # normal font for buttons/entries
+                widget.config(font=normal_font)
+            elif isinstance(widget, ttk.Widget):
+                # font for widget types
+                wtype = widget.winfo_class()
+                if 'Label' in wtype:
+                    widget.config(style='TLabel')
+                elif 'Button' in wtype:
+                    widget.config(style='TButton')
+
+
 
     def change_colour(self):
         # for accessibility, change the colour of the text for better readability
