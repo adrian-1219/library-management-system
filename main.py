@@ -6,7 +6,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Library Management System')
-        self.geometry('1280x580')
+        self.geometry('1280x680')
 
         self.container = tk.Frame(self)
         self.container.pack(expand=True, fill="both", padx=20, pady=20)
@@ -25,10 +25,10 @@ class App(tk.Tk):
             self.frames[F.__name__] = frame  # Use class name as string for key
             frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)
 
-        self.show_frame("StartPage")  # Reference frames using class names as strings
+        self.show_frame("HomePage")
 
     def show_frame(self, cont):
-        '''Show a frame for the given page name'''
+        """Show a frame for the given page name"""
         frame = self.frames[cont]
         frame.tkraise()
 

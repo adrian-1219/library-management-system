@@ -20,7 +20,7 @@ def getBorrowHistory(username, page = 1):
     result = cursor.fetchall()
     borrowResults = []
     for row in result:
-        print(row)
+        # print(row)
         datetimeBorrowed = datetime.datetime.strptime(row[2].split(".", 1)[0], '%Y-%m-%d %H:%M:%S')
         datetimeReturned = None
         if row[3]:
@@ -50,6 +50,6 @@ def returnBook(username, bookISBN):
 
 # testing
 # returnBook("a", "0679425608")
-print(getBorrowHistory("a", 1))
+# print(getBorrowHistory("a", 1))
 # borrowBook("a", "0679425608")
 # print(getBorrowHistory("a")[0].dateReturned, getBorrowHistory("a")[0].dateBorrowed)

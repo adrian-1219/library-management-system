@@ -2,11 +2,15 @@ import random
 import sqlite3
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
+
+import requests
+
 from account_manager import RegisterFunction
 import book_manager, datetime, borrow_manager
 
 
 class StartPage(tk.Frame):
+    """This is the start page of the library management system. It will allow the user to register or login."""
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -16,6 +20,7 @@ class StartPage(tk.Frame):
 
 
 class RegisterPage(tk.Frame):
+    """This is the register page of the library management system. It will allow the user to register to the system."""
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -24,6 +29,7 @@ class RegisterPage(tk.Frame):
         # a button to go back to the start page on the top left corner
         ttk.Button(self, text="Back", command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
 
+        # entry boxes for the username, password, and verify password
         username_label = tk.Label(self, text="Username")
         username_label.place(relx=0.45, rely=0.3, anchor="e")
         self.username_entry = ttk.Entry(self)
@@ -31,6 +37,7 @@ class RegisterPage(tk.Frame):
 
         password_label = tk.Label(self, text="Password")
         password_label.place(relx=0.45, rely=0.4, anchor="e")
+        # show the password as asterisks
         self.password_entry = ttk.Entry(self, show="*")
         self.password_entry.place(relx=0.45, rely=0.4, anchor="w")
 
@@ -138,18 +145,14 @@ class HomePage(tk.Frame):
         self.books_frame.pack(expand=True, fill="both", padx=20, pady=20)
 
         self.display_books()
-        # ttk.Button(self, text="Logout",
-        #            command=lambda: controller.show_frame("StartPage")).place(relx=0.5, rely=0.5, anchor="center")
-
-        # a function to display random 10 books from the database (note: changed to display a random page
-        # and a random entry for the random books
+        
     def display_books(self):
         # get all the books from the database
         # all_books = book_manager.search()
         # random_books = random.sample(all_books, min(len(all_books), 10))
 
         # get random books from the database by choosing a random page and a random entry
-        random_books = book_manager.search(page=random.randint(1, 20))
+        random_books = book_manager.fetch_random_books(10)
         tk.Label(self.books_frame, text="   Books of The Day", font=("Helvetica", 20, "bold"), anchor="w").pack(fill="x", pady=(10, 20))
 
         for book in random_books:
@@ -170,9 +173,9 @@ class BookDetailsPage(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         self.book = book
+
         self.toolbar = CustomToolbar(self, controller)
         self.toolbar.pack(side="top", fill="x")
-
         tk.Label(self, text="Book Details", font=("Helvetica", 20, "bold")).pack(pady=10)
 
         # Display book information
@@ -193,18 +196,60 @@ class BookDetailsPage(tk.Frame):
 
     def displayBookDetails(self):
         """Display book details on the page"""
-        self.titleLabel = tk.Label(self, text=f"Title: {self.book.title}", font=("Helvetica", 16))
-        self.authorLabel = tk.Label(self, text=f"Author: {self.book.author}", font=("Helvetica", 16))
-        self.ISBNLabel = tk.Label(self, text=f"ISBN: {self.book.ISBN}", font=("Helvetica", 16))
-        self.yearLabel = tk.Label(self, text=f"Year Published: {self.book.yearPublished}", font=("Helvetica", 16))
-        self.publisherLabel = tk.Label(self, text=f"Publisher: {self.book.publisher}", font=("Helvetica", 16))
-        self.availabilityLabel = tk.Label(self, text=f"Availability: {self.book.availability}", font=("Helvetica", 16))
-        self.titleLabel.pack()
-        self.authorLabel.pack()
-        self.ISBNLabel.pack()
-        self.yearLabel.pack()
-        self.publisherLabel.pack()
-        self.availabilityLabel.pack()
+        # get the summary and rating of the book from the google books api
+        summary_rating = self.get_book_details(str(self.book.ISBN))
+        summary, rating = summary_rating
+
+        # details container frame
+        details_frame = tk.Frame(self)
+        details_frame.pack(fill='x', padx=10, pady=10)
+
+        regular_font = ("Helvetica", 16)
+        # make the bold_font bold and blue color
+        bold_font = ("Helvetica", 16, "bold")
+        text_color = "#68fcf7"
+
+        # Title
+        tk.Label(details_frame, text="Title: ", font=regular_font).pack(anchor='w')
+        self.titleLabel = tk.Label(details_frame, text=f"{self.book.title}", font=bold_font, fg=text_color)
+        self.titleLabel.pack(anchor='w')
+
+        # Author
+        tk.Label(details_frame, text="Author: ", font=regular_font).pack(anchor='w')
+        self.authorLabel = tk.Label(details_frame, text=f"{self.book.author}", font=bold_font, fg=text_color)
+        self.authorLabel.pack(anchor='w')
+
+        # ISBN
+        tk.Label(details_frame, text="ISBN: ", font=regular_font).pack(anchor='w')
+        self.ISBNLabel = tk.Label(details_frame, text=f"{self.book.ISBN}", font=bold_font, fg=text_color)
+        self.ISBNLabel.pack(anchor='w')
+
+        # Year Published
+        tk.Label(details_frame, text="Year Published: ", font=regular_font).pack(anchor='w')
+        self.yearLabel = tk.Label(details_frame, text=f"{self.book.yearPublished}", font=bold_font, fg=text_color)
+        self.yearLabel.pack(anchor='w')
+
+        # Publisher
+        tk.Label(details_frame, text="Publisher: ", font=regular_font).pack(anchor='w')
+        self.publisherLabel = tk.Label(details_frame, text=f"{self.book.publisher}", font=bold_font, fg=text_color)
+        self.publisherLabel.pack(anchor='w')
+
+        # Rating
+        tk.Label(details_frame, text="Rating: ", font=regular_font).pack(anchor='w')
+        self.ratingLabel = tk.Label(details_frame, text=f"{rating}", font=bold_font, fg=text_color)
+        self.ratingLabel.pack(anchor='w')
+
+        # Only display 1000 characters of the summary
+        formatted_summary = summary[:1000] + "..." if len(summary) > 1000 else summary
+        # only display 180 characters of the formatted summary each line
+        formatted_summary = "\n".join([formatted_summary[i:i+180] for i in range(0, len(formatted_summary), 180)])
+
+        tk.Label(details_frame, text="Summary: ", font=regular_font).pack(anchor='w')
+        self.summaryLabel = tk.Label(details_frame, text=f"{formatted_summary}", font=("Helvetica", 16), justify='left', fg=text_color)
+        self.summaryLabel.pack(anchor='w')
+
+        self.availabilityLabel = tk.Label(details_frame, text=f"Availability: {self.book.availability}", font=("Helvetica", 16))
+        self.availabilityLabel.pack(anchor='e', pady=15, padx=15)
 
     def clearBookDetails(self):
         """Clear book details from the page"""
@@ -238,6 +283,27 @@ class BookDetailsPage(tk.Frame):
         self.borrowReturnBtn = tk.Button(self, text="Return", command=self.returnBook)
         self.borrowReturnBtn.pack()
 
+    # this function utilizes googlebooks api to get the book details
+    def get_book_details(self, isbn: str) -> (str, int):
+        # credit to https://www.datacamp.com/tutorial/making-http-requests-in-python
+        # get the book details from the google books api
+        url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
+        response = requests.get(url)
+        # notes: status code of 200 means server successfully processed
+        if response.status_code == 200:
+            data = response.json()
+            # if "totalItems" is greater than 0, means the book is found
+            if data["totalItems"] > 0:
+                book_info = data["items"][0]["volumeInfo"]
+                summary = book_info.get("description", "No summary available")
+                rating = book_info.get("averageRating", "No rating available")
+                return (summary, rating)
+            else:
+                return "No results found"
+        else:
+            return "Failed to fetch data"
+
+
 
 class SearchPage(tk.Frame):
     """This page will allow the user to search for books by title, author, year, or publisher."""
@@ -257,7 +323,7 @@ class SearchPage(tk.Frame):
         search_container.pack(side="top", fill="x", padx=10, pady=10)
 
         # Year range selection for search
-        print(datetime.date.today())
+        # print(datetime.date.today())
         years = list(range(1900, datetime.date.today().year + 1))
         years.append("Any")
         self.yearRangeLabel = tk.Label(search_container, text="Year Range: ")
@@ -459,8 +525,8 @@ class BorrowedBooksPage(tk.Frame):
 
     def goToBookDetails(self):
         curItem = self.treeview.item(self.treeview.focus())
-        print("focus(): ", self.treeview.focus())
-        print(curItem)
+        # print("focus(): ", self.treeview.focus())
+        # print(curItem)
         if curItem["text"]:
             book = book_manager.getBookDetails(curItem["text"])
             self.controller.show_book("BookDetailsPage", book)

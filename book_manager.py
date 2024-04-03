@@ -28,6 +28,7 @@ def toTuple(book):
     return (book.ISBN, book.title, book.author, book.yearPublished, book.publisher)
 
 def search(keyword = None, yearRange = None, page = 1):
+    """Searches for books based on keyword and year range, returns a list of Book objects"""
     resultsPerPage = 20
     if keyword and not yearRange:
         keyword = "%" + keyword + "%"
@@ -58,6 +59,14 @@ def search(keyword = None, yearRange = None, page = 1):
     result = cursor.fetchmany(20) # Limits results to 20 per page
     bookSearchResults = []
     for row in result:
-        print(row)
+        # print(row)
         bookSearchResults.append(toBook(row))
     return bookSearchResults
+
+
+def fetch_random_books(limit=10):
+    """ Fetches a list of random books from the database """
+    cursor.execute("SELECT * FROM books ORDER BY RANDOM() LIMIT ?", (limit,))
+    result = cursor.fetchall()
+    return [toBook(row) for row in result]
+
