@@ -201,11 +201,40 @@ class HomePage(tk.Frame):
         self.toolbar = CustomToolbar(self, controller)
         self.toolbar.pack(side="top", fill="x")
 
-        # a frame to display the books
-        self.books_frame = tk.Frame(self)
-        self.books_frame.pack(expand=True, fill="both", padx=20, pady=20)
+        # # a frame to display the books
+        # self.books_frame = tk.Frame(self)
+        # self.books_frame.pack(expand=True, fill="both", padx=20, pady=20)
+
+        # scrollbar
+        self.scrollbar = ttk.Scrollbar(self)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # canvas 
+        self.canvas = tk.Canvas(self, yscrollcommand=self.scrollbar.set)
+        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # configuring scrollbar 
+        self.scrollbar.config(command=self.canvas.yview)
+
+        # book frame
+        self.books_frame = tk.Frame(self.canvas)
+        
+        # canvas configuration
+        self.canvas_frame = self.canvas.create_window((0, 0), window=self.books_frame, anchor="nw")
+
+        # books_frame adjust to content
+        self.books_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        # adjust canvas when window is resized
+        self.bind("<Configure>", self._frame_width)
+
 
         self.display_books()
+
+
+    def _frame_width(self, event):
+        # adjusting the width of canvas window
+        canvas_width = event.width
+        self.canvas.itemconfig(self.canvas_frame, width=canvas_width)
         
     def display_books(self):
         # get all the books from the database
@@ -697,7 +726,7 @@ class CustomToolbar(tk.Frame):
         self.search_icon = tk.PhotoImage(file="assets/search.png")
 
         # home page button
-        tk.Button(self, text="Home", command=lambda: controller.show_frame("HomePage")).pack(side="left", padx=10)
+        tk.Button(self, text="Home", command=lambda: controller.show_frame("HomePage")).pack(side="left", padx=10, pady=10)
 
         # account menu
         account_menu = tk.Menubutton(self, text="Account", relief=tk.RAISED)
@@ -707,16 +736,16 @@ class CustomToolbar(tk.Frame):
         account_menu.menu.add_command(label="Borrowed Books", command=lambda: controller.show_borrow_history("BorrowedBooksPage"))
         account_menu.menu.add_command(label="Recommendation", command=lambda: controller.show_frame("RecommendPage"))
         account_menu.menu.add_command(label="Log out", command=lambda: controller.show_frame("StartPage"))
-        account_menu.pack(side="right", padx=10)
+        account_menu.pack(side="right", padx=10, pady=10)
 
         # Search Button 
-        tk.Button(self, image=self.search_icon, command=lambda: controller.show_frame("SearchPage")).pack(side="right", padx=10)
+        tk.Button(self, image=self.search_icon, command=lambda: controller.show_frame("SearchPage")).pack(side="right", padx=10, pady=10)
 
         # Accessibility Menu
         accessibility_menu = tk.Menubutton(self, text="Accessibility", relief=tk.RAISED)
         accessibility_menu.menu = tk.Menu(accessibility_menu, tearoff=0)
         accessibility_menu["menu"] = accessibility_menu.menu
-        accessibility_menu.pack(side="right", padx=10)
+        accessibility_menu.pack(side="right", padx=10, pady=10)
 
         # Font Menu
         font_menu = tk.Menu(accessibility_menu.menu, tearoff=0)
