@@ -755,7 +755,10 @@ class CustomToolbar(tk.Frame):
         accessibility_menu.menu.add_cascade(label='Font', menu=font_menu, underline=0)
 
         # Colour menu
-        accessibility_menu.menu.add_command(label="Colour", command=self.change_colour)
+        colour_menu = tk.Menu(accessibility_menu.menu, tearoff=0)
+        colour_menu.add_command(label="High Contrast", command=lambda: self.change_colour("high_contrast"))
+        colour_menu.add_command(label="Normal", command=lambda: self.change_colour("normal"))
+        accessibility_menu.menu.add_cascade(label="Colour", menu=colour_menu)
                
 
     def fontsize_up(self):
@@ -822,7 +825,29 @@ class CustomToolbar(tk.Frame):
                     widget.config(style='TButton')
 
 
+    def change_colour(self, theme):
+        """for accessibility, change the colour of the text and buttons for better readability"""
+        if theme == "high_contrast":
+            # white text on black background and dark grey butotns
+            background_color = "#000000"  
+            text_color = "#FFFFF"  
+            button_color = "#333333"  
+        elif theme == "normal":
+            # default colours
+            background_color = "SystemButtonFace"
+            text_color = "SystemWindowText"
+            button_color = "SystemButtonFace"
 
-    def change_colour(self):
-        # for accessibility, change the colour of the text for better readability
-        pass
+        # apply colors to tkinter widgets
+        for widget in self.controller.walk_widgets():
+            if isinstance(widget, tk.Label) or isinstance(widget, tk.Entry):
+                widget.config(background=background_color, foreground=text_color)
+            elif isinstance(widget, tk.Button):
+                widget.config(background=button_color, foreground=text_color, activebackground=button_color)
+
+        # apply colors to ttk widgets
+        style = ttk.Style()
+        style.configure("TLabel", background=background_color, foreground=text_color)
+        style.configure("TButton", background=button_color, foreground=text_color)
+        style.configure("TEntry", fieldbackground=background_color, foreground=text_color)
+        style.map("TButton", background=[("active", button_color)], foreground=[("active", text_color)])
