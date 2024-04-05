@@ -1,28 +1,32 @@
 import tkinter as tk
+from tkinter.font import Font
+
 from pages import StartPage, RegisterPage, LoginPage, HomePage, SearchPage, BorrowedBooksPage, AccountPage, \
-    BookDetailsPage, CustomToolbar
-import tkinter.font as tkfont
-from cryptography.fernet import Fernet
+    BookDetailsPage
+
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Library Management System')
         self.geometry('1280x680')
+        self.resizable(False, False)
         # self.set_default_font()
         self.container = tk.Frame(self)
         self.container.pack(expand=True, fill="both")
         self.current_frame = None
         self.username = None
         self.frames = {}
+        self.db_font = Font(family="Times New Roman", size=16)
+        self.bd_FONT = Font(family="Times New Roman", size=16, weight="bold")
 
-        # # set a single font to be used throughout the app
+        # set a single font to be used throughout the app
         # self.title_font = tkfont.Font(
         #     family='Helvetica', size=18, weight="bold", slant="italic")
 
         # Create all the pages, this needs to be updated
         # for each other custom Frame class you make, you could add it to this tuple
-        for F in (StartPage, RegisterPage, LoginPage, HomePage, SearchPage, AccountPage, BorrowedBooksPage):
+        for F in (StartPage, RegisterPage, LoginPage, HomePage, SearchPage, AccountPage, BorrowedBooksPage, BookDetailsPage):
             frame = F(parent=self.container, controller=self)
             self.frames[F.__name__] = frame  # Use class name as string for key
             frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)

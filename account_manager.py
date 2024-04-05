@@ -4,13 +4,16 @@ from cryptography.fernet import Fernet
 with open('encryption_key', 'r') as f:
     key = f.readline()
 
+
 def encrypt(password, key):
     et = Fernet(key).encrypt(password.encode()) 
     return et.decode()
 
-def decrypt(encryptedPassword, key):
-    dt = Fernet(key).decrypt(encryptedPassword)
+
+def decrypt(encrypted_password, key):
+    dt = Fernet(key).decrypt(encrypted_password)
     return dt.decode()
+
 
 class RegisterFunction():
     @staticmethod
