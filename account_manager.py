@@ -1,4 +1,5 @@
 import sqlite3
+import bcrypt
 
 class RegisterFunction():
     @staticmethod
@@ -10,7 +11,6 @@ class RegisterFunction():
                       password TEXT NOT NULL)''')
         conn.commit()
         conn.close()
-
     @staticmethod
     def insert_account(username, password):
         conn = sqlite3.connect('library.db')
@@ -18,6 +18,7 @@ class RegisterFunction():
         c.execute("INSERT INTO account (username, password) VALUES (?, ?)", (username, password))
         conn.commit()
         conn.close()
+
 
     @staticmethod
     def check_username(username):

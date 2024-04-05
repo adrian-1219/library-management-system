@@ -1,12 +1,8 @@
-
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from PIL import Image, ImageTk
 from tkinter.font import Font
-
-
 import requests
-
 import account_manager
 from account_manager import RegisterFunction
 import book_manager, datetime, borrow_manager
@@ -68,7 +64,6 @@ class RegisterPage(tk.Frame):
 
         # a button to go back to the start page on the top left corner
         ttk.Button(self, text="Back", style='Transparent.TButton', command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
-
 
         # entry boxes for the username, password, and verify password
         username_label = tk.Label(self, text="Username")
@@ -140,9 +135,6 @@ class LoginPage(tk.Frame):
         # change to 'aqua' for originally sytled buttons
         style.theme_use('alt')
         style.configure('Transparent.TButton', borderwidth=0, padding=0)
-
-
-        # tk.Label(self, text="Login").place(relx=0.5, rely=0.3, anchor="center")
 
         # a button to go back to the start page on the top left corner
         ttk.Button(self, text="Back", style='Transparent.TButton', command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
@@ -245,10 +237,10 @@ class BookDetailsPage(tk.Frame):
         # print(self.controller.username)
 
         # Borrow or return button
-        # ------------------this need to be updated (maybe only show the return button if its
+        # ------------------this may need to be updated (maybe only show the return button if its
         # borrowed instead of replacing it?-------------------------------------------
         if borrow_manager.borrowed(self.controller.username, self.book.ISBN):
-            self.borrowReturnBtn = tk.Button(self, text="Return", command=self.returnBook)
+            self.borrowReturnBtn = tk.Button(self, text="Return The Book", command=self.returnBook)
             self.borrowReturnBtn.pack()
         else:
             self.borrowReturnBtn = tk.Button(self, text="Borrow", command=self.borrowBook)
@@ -770,7 +762,6 @@ class CustomToolbar(tk.Frame):
         style.configure('TLabel', font=title_font)
         style.configure('TButton', font=normal_font)
 
-
         for widget in self.controller.walk_widgets():
             if isinstance(widget, tk.Label):
                 # title font for labels
@@ -785,7 +776,6 @@ class CustomToolbar(tk.Frame):
                     widget.config(style='TLabel')
                 elif 'Button' in wtype:
                     widget.config(style='TButton')
-
 
     def change_colour(self, theme):
         """for accessibility, change the colour of the text and buttons for better readability"""

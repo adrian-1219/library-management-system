@@ -69,16 +69,15 @@ class App(tk.Tk):
         frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)
         frame.tkraise()
 
-    # # walk through all widgets to change fonts
-    # def walk_widgets(self, container=None):
-    #     if container is None:
-    #         container = self
-    #     # Check if the widget has the 'winfo_children' method
-    #     if hasattr(container, 'winfo_children'):
-    #         for widget in container.winfo_children():
-    #             yield widget
-    #             # Recursively yield from child widgets
-    #             yield from self.walk_widgets(widget)
+    def walk_widgets(self, container=None):
+        if container is None:
+            container = self
+        # Check if the widget has the 'winfo_children' method
+        if hasattr(container, 'winfo_children'):
+            for widget in container.winfo_children():
+                yield widget
+                # Recursively yield from child widgets
+                yield from self.walk_widgets(widget)
 
 
 if __name__ == "__main__":
