@@ -1,5 +1,4 @@
-import random
-import sqlite3
+
 import tkinter as tk
 from tkinter import ttk, messagebox, simpledialog
 from PIL import Image, ImageTk
@@ -8,6 +7,7 @@ from tkinter.font import Font
 
 import requests
 
+import account_manager
 from account_manager import RegisterFunction
 import book_manager, datetime, borrow_manager
 
@@ -142,7 +142,6 @@ class LoginPage(tk.Frame):
         style.configure('Transparent.TButton', borderwidth=0, padding=0)
 
 
-
         # tk.Label(self, text="Login").place(relx=0.5, rely=0.3, anchor="center")
 
         # a button to go back to the start page on the top left corner
@@ -202,40 +201,11 @@ class HomePage(tk.Frame):
         self.toolbar.pack(side="top", fill="x")
 
         # # a frame to display the books
-        # self.books_frame = tk.Frame(self)
-        # self.books_frame.pack(expand=True, fill="both", padx=20, pady=20)
-
-        # scrollbar
-        self.scrollbar = ttk.Scrollbar(self)
-        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
-
-        # canvas 
-        self.canvas = tk.Canvas(self, yscrollcommand=self.scrollbar.set)
-        self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-        # configuring scrollbar 
-        self.scrollbar.config(command=self.canvas.yview)
-
-        # book frame
-        self.books_frame = tk.Frame(self.canvas)
-        
-        # canvas configuration
-        self.canvas_frame = self.canvas.create_window((0, 0), window=self.books_frame, anchor="nw")
-
-        # books_frame adjust to content
-        self.books_frame.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-        # adjust canvas when window is resized
-        self.bind("<Configure>", self._frame_width)
-
+        self.books_frame = tk.Frame(self)
+        self.books_frame.pack(expand=True, fill="both", padx=20, pady=20)
 
         self.display_books()
 
-
-    def _frame_width(self, event):
-        # adjusting the width of canvas window
-        canvas_width = event.width
-        self.canvas.itemconfig(self.canvas_frame, width=canvas_width)
-        
     def display_books(self):
         # get all the books from the database
         # all_books = book_manager.search()
@@ -384,21 +354,22 @@ class BookDetailsPage(tk.Frame):
         # credit to https://www.datacamp.com/tutorial/making-http-requests-in-python
         # get the book details from the google books api
         url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
-        response = requests.get(url)
-        # notes: status code of 200 means server successfully processed
-        if response.status_code == 200:
-            data = response.json()
-            # if "totalItems" is greater than 0, means the book is found
-            if data["totalItems"] > 0:
-                book_info = data["items"][0]["volumeInfo"]
-                summary = book_info.get("description", "No summary available")
-                rating = book_info.get("averageRating", "No rating available")
-                return (summary, rating)
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                # Check if any books were found
+                if data["totalItems"] > 0:
+                    book_info = data["items"][0]["volumeInfo"]
+                    summary = book_info.get("description", "No summary available")
+                    rating = str(book_info.get("averageRating", "No rating available"))
+                    return summary, rating
+                else:
+                    return "No results found", "N/A"
             else:
-                return "No results found"
-        else:
-            return "Failed to fetch data"
-
+                return "Failed to fetch data", "N/A"
+        except Exception:
+            return "Data retrieval error", "N/A"
 
 
 class SearchPage(tk.Frame):
@@ -640,81 +611,59 @@ class AccountPage(tk.Frame):
         self.controller = controller
         self.toolbar = CustomToolbar(self, controller)
         self.toolbar.pack(side="top", fill="x")
-        # self.username = None
-    
-        tk.Label(self, text="Account Page", font=("Helvetica", 20)).place(relx=0.5, rely=0.1, anchor="center")
-        tk.Label(self, text="Username:").place(relx=0.3, rely=0.3, anchor="e")
-        # tk.Label(self, text=self.username).place(relx=0.35, rely=0.3, anchor="w")
-    
-        tk.Label(self, text="Password:").place(relx=0.3, rely=0.4, anchor="e")
-        # password = self.get_password(self.username)
-        # tk.Label(self, text=password).place(relx=0.35, rely=0.4, anchor="w")
-    
-        ttk.Button(self, text="Modify Username", command=self.modify_username).place(relx=0.5, rely=0.5,
+        self.username_label = None
+        self.password_label = None
+        tk.Label(self, text="Account Page", font="Helvetica 30 bold").place(relx=0.5, rely=0.1, anchor="center")
+        ttk.Button(self, text="Change Username", command=self.change_username).place(relx=0.5, rely=0.5,
                                                                                      anchor="center")
-        ttk.Button(self, text="Modify Password", command=self.modify_password).place(relx=0.5, rely=0.6,
+        ttk.Button(self, text="Change Password", command=self.change_password).place(relx=0.5, rely=0.55,
                                                                                      anchor="center")
-        ttk.Button(self, text="Modify Email", command=self.modify_email).place(relx=0.5, rely=0.7,
-                                                                               anchor="center")
-        ttk.Button(self, text="Logout", command=self.logout).place(relx=0.5, rely=0.8, anchor="center")
+        # ttk.Button(self, text="Logout", command=self.logout).place(relx=0.5, rely=0.6, anchor="center")
 
+    # this function will display the current account information as username, password via the account_manager.py
+    def display_account_info(self):
+        # clear the previous account information
+        if self.username_label:
+            self.username_label.destroy()
+        if self.password_label:
+            self.password_label.destroy()
 
-    
-    # def set_username(self, username):
-    #     self.username = username
+        if self.controller.username:
+            username, password = account_manager.RegisterFunction.get_account(self.controller.username)
+            # Display the account username and password as a label on the page
+            self.username_label = tk.Label(self, text=f"Username: {username}", font="Helvetica 20")
+            self.username_label.place(relx=0.35, rely=0.3, anchor="w")
+            self.password_label = tk.Label(self, text=f"Password: {password}", font="Helvetica 20")
+            self.password_label.place(relx=0.35, rely=0.4, anchor="w")
 
-    def get_password(self, username):
-        conn = sqlite3.connect('account.db')
-        c = conn.cursor()
-        c.execute("SELECT password FROM account WHERE username = ?", (username,))
-        result = c.fetchone()
-        conn.close()
-        return result[0] if result else ""
-        pass
-    
-    def modify_username(self):
-        new_username = simpledialog.askstring("Input", "Enter new username:", parent=self)
-        if new_username:
-            result = RegisterFunction.check_username(new_username)
-            if result:
-                messagebox.showinfo('Error', 'Username already exists')
-            else:
-                conn = sqlite3.connect('account.db')
-                c = conn.cursor()
-                c.execute("UPDATE account SET username = ? WHERE username = ?", (new_username, self.username))
-                conn.commit()
-                conn.close()
-                messagebox.showinfo('Success', 'Username modified successfully')
-                self.controller.show_frame(AccountPage, new_username)
-        pass
-    
-    def modify_password(self):
-        new_password = simpledialog.askstring("Input", "Enter new password:", parent=self)
-        if new_password:
-            conn = sqlite3.connect('account.db')
-            c = conn.cursor()
-            c.execute("UPDATE account SET password = ? WHERE username = ?", (new_password, self.username))
-            conn.commit()
-            conn.close()
-            messagebox.showinfo('Success', 'Password modified successfully')
-        pass
-    
-    def modify_email(self):
-        new_email = simpledialog.askstring("Input", "Enter new email:", parent=self)
-        if new_email:
-            conn = sqlite3.connect('account.db')
-            c = conn.cursor()
-            c.execute("UPDATE account SET email = ? WHERE username = ?", (new_email, self.username))
-            conn.commit()
-            conn.close()
-            messagebox.showinfo('Success', 'Email modified successfully')
-        pass
-    
-    def logout(self):
-        RegisterFunction.delete_account(self.username)
-        messagebox.showinfo('Success', 'Account deleted successfully')
-        self.controller.show_frame(StartPage)
+    # this function allows the user to modify the password via the account_manager.py
+    def change_password(self):
+        if self.controller.username:
+            username, password = account_manager.RegisterFunction.get_account(self.controller.username)
+            # ask the user to enter the new password
+            new_password = simpledialog.askstring("Input", "Enter the new password", parent=self)
+            # if the user entered the new password
+            if new_password:
+                # update the password
+                account_manager.RegisterFunction.update_password(username, new_password)
+                messagebox.showinfo("Success", "Password updated successfully")
+                self.display_account_info()
 
+    # this function allows the user to modify the username via the account_manager.py
+    def change_username(self):
+        if self.controller.username:
+            username, password = account_manager.RegisterFunction.get_account(self.controller.username)
+            # ask the user to enter the new username
+            new_username = simpledialog.askstring("Input", "Enter the new username", parent=self)
+            # if the user entered the new username
+            if new_username:
+                # update the username
+                # transfer the borrowed books to the new username
+                borrow_manager.transferBorrow(username, new_username)
+                account_manager.RegisterFunction.update_username(username, new_username)
+                self.controller.username = new_username
+                messagebox.showinfo("Success", "Username updated successfully")
+                self.display_account_info()
 
 class RecommendPage(tk.Frame):
     # for books suggestions based on user's borrowing history
@@ -738,10 +687,14 @@ class CustomToolbar(tk.Frame):
         account_menu = tk.Menubutton(self, text="Account", relief=tk.RAISED)
         account_menu.menu = tk.Menu(account_menu, tearoff=0)
         account_menu["menu"] = account_menu.menu
-        account_menu.menu.add_command(label="Account Setting", command=lambda: controller.show_frame("AccountPage"))
+
+        account_menu.menu.add_command(label="Account Setting", command=lambda: [self.update_account_page(), controller.show_frame("AccountPage")])
         account_menu.menu.add_command(label="Borrowed Books", command=lambda: controller.show_borrow_history("BorrowedBooksPage"))
         account_menu.menu.add_command(label="Recommendation", command=lambda: controller.show_frame("RecommendPage"))
         account_menu.menu.add_command(label="Log out", command=lambda: controller.show_frame("StartPage"))
+        # debug
+        # account_menu.menu.add_command(label="show", command=self.show_account)
+
         account_menu.pack(side="right", padx=10, pady=10)
 
         # Search Button 
@@ -765,7 +718,10 @@ class CustomToolbar(tk.Frame):
         colour_menu.add_command(label="High Contrast", command=lambda: self.change_colour("high_contrast"))
         colour_menu.add_command(label="Normal", command=lambda: self.change_colour("normal"))
         accessibility_menu.menu.add_cascade(label="Colour", menu=colour_menu)
-               
+
+    # debug
+    def update_account_page(self):
+        AccountPage.display_account_info(self.controller.frames["AccountPage"])
 
     def fontsize_up(self):
         new_font = Font(family='Times New Roman', size=30)

@@ -1,18 +1,17 @@
 import tkinter as tk
 from pages import StartPage, RegisterPage, LoginPage, HomePage, SearchPage, BorrowedBooksPage, AccountPage, \
     BookDetailsPage, CustomToolbar
-
+import tkinter.font as tkfont
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Library Management System')
         self.geometry('1280x680')
-
+        # self.set_default_font()
         self.container = tk.Frame(self)
         self.container.pack(expand=True, fill="both")
-
-        
+        self.current_frame = None
         self.username = None
         self.frames = {}
 
@@ -22,7 +21,7 @@ class App(tk.Tk):
 
         # Create all the pages, this needs to be updated
         # for each other custom Frame class you make, you could add it to this tuple
-        for F in (StartPage, RegisterPage, LoginPage, HomePage, SearchPage, AccountPage):
+        for F in (StartPage, RegisterPage, LoginPage, HomePage, SearchPage, AccountPage, BorrowedBooksPage):
             frame = F(parent=self.container, controller=self)
             self.frames[F.__name__] = frame  # Use class name as string for key
             frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)
@@ -32,12 +31,19 @@ class App(tk.Tk):
         # User must login for borrow history to work
         self.show_frame("StartPage")
 
-    def show_frame(self, cont, username=None):
+    # not working
+    # def set_default_font(self):
+    #     print("setting default font")
+    #     default_font = tkfont.Font(family='Times New Roman', size=12)
+    #     self.option_add("*Font", default_font)
+
+    def show_frame(self, cont):
         """Show a frame for the given page name"""
         frame = self.frames[cont]
         # if cont == 'AcocuntPage' and username is not None:
         #     frame.set_username(username)
         frame.tkraise()
+        self.current_frame = cont
 
     def add_menu(self, frame):
         menu_bar = tk.Menu(frame)
@@ -63,16 +69,17 @@ class App(tk.Tk):
         frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)
         frame.tkraise()
 
-    # walk through all widgets to change fonts
-    def walk_widgets(self, container=None):
-        if container is None:
-            container = self
-        # Check if the widget has the 'winfo_children' method
-        if hasattr(container, 'winfo_children'):
-            for widget in container.winfo_children():
-                yield widget
-                # Recursively yield from child widgets
-                yield from self.walk_widgets(widget)
+    # # walk through all widgets to change fonts
+    # def walk_widgets(self, container=None):
+    #     if container is None:
+    #         container = self
+    #     # Check if the widget has the 'winfo_children' method
+    #     if hasattr(container, 'winfo_children'):
+    #         for widget in container.winfo_children():
+    #             yield widget
+    #             # Recursively yield from child widgets
+    #             yield from self.walk_widgets(widget)
+
 
 if __name__ == "__main__":
     app = App()

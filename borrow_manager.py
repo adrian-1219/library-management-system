@@ -48,6 +48,12 @@ def returnBook(username, bookISBN):
     connection.commit()
 
 
+# transfer the borrowed book history
+def transferBorrow(username, newUsername):
+    cursor.execute('''UPDATE borrow SET username = ? WHERE username = ?''', (newUsername, username))
+    connection.commit()
+
+
 # testing
 # returnBook("a", "0679425608")
 # print(getBorrowHistory("a", 1))
