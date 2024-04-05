@@ -168,7 +168,7 @@ class LoginPage(tk.Frame):
         password = self.password_entry.get()
         # call the check_password function
         if self.check_password(username, password):
-            messagebox.showinfo("Login Successful", "You have successfully logged in.")
+            # messagebox.showinfo("Login Successful", "You have successfully logged in.")
             self.controller.show_frame("HomePage")
             self.controller.username = username
         else:
@@ -272,7 +272,7 @@ class BookDetailsPage(tk.Frame):
         self.displayBookDetails()
 
         # check the current username logged in and try to display in the top left corner for later use
-        print(self.controller.username)
+        # print(self.controller.username)
 
         # Borrow or return button
         # ------------------this need to be updated (maybe only show the return button if its
@@ -283,6 +283,10 @@ class BookDetailsPage(tk.Frame):
         else:
             self.borrowReturnBtn = tk.Button(self, text="Borrow", command=self.borrowBook)
             self.borrowReturnBtn.pack()
+            if self.book.availability == 0:
+                self.borrowReturnBtn["state"] = "disabled"
+            else:
+                self.borrowReturnBtn["state"] = "normal"
 
     def displayBookDetails(self):
         """Display book details on the page"""
@@ -291,8 +295,8 @@ class BookDetailsPage(tk.Frame):
         summary, rating = summary_rating
 
         # details container frame
-        details_frame = tk.Frame(self)
-        details_frame.pack(fill='x', padx=10, pady=10)
+        self.details_frame = tk.Frame(self)
+        self.details_frame.pack(fill='x', padx=10, pady=10)
 
         regular_font = ("Helvetica", 16)
         # make the bold_font bold and blue color
@@ -300,33 +304,39 @@ class BookDetailsPage(tk.Frame):
         text_color = "#68fcf7"
 
         # Title
-        tk.Label(details_frame, text="Title: ", font=regular_font).pack(anchor='w')
-        self.titleLabel = tk.Label(details_frame, text=f"{self.book.title}", font=bold_font, fg=text_color)
+        self.titleLabelRegular = tk.Label(self.details_frame, text="Title: ", font=regular_font)
+        self.titleLabelRegular.pack(anchor='w')
+        self.titleLabel = tk.Label(self.details_frame, text=f"{self.book.title}", font=bold_font, fg=text_color)
         self.titleLabel.pack(anchor='w')
 
         # Author
-        tk.Label(details_frame, text="Author: ", font=regular_font).pack(anchor='w')
-        self.authorLabel = tk.Label(details_frame, text=f"{self.book.author}", font=bold_font, fg=text_color)
+        self.authorLabelRegular = tk.Label(self.details_frame, text="Author: ", font=regular_font)
+        self.authorLabelRegular.pack(anchor='w')
+        self.authorLabel = tk.Label(self.details_frame, text=f"{self.book.author}", font=bold_font, fg=text_color)
         self.authorLabel.pack(anchor='w')
 
         # ISBN
-        tk.Label(details_frame, text="ISBN: ", font=regular_font).pack(anchor='w')
-        self.ISBNLabel = tk.Label(details_frame, text=f"{self.book.ISBN}", font=bold_font, fg=text_color)
+        self.ISBNLabelRegular = tk.Label(self.details_frame, text="ISBN: ", font=regular_font)
+        self.ISBNLabelRegular.pack(anchor='w')
+        self.ISBNLabel = tk.Label(self.details_frame, text=f"{self.book.ISBN}", font=bold_font, fg=text_color)
         self.ISBNLabel.pack(anchor='w')
 
         # Year Published
-        tk.Label(details_frame, text="Year Published: ", font=regular_font).pack(anchor='w')
-        self.yearLabel = tk.Label(details_frame, text=f"{self.book.yearPublished}", font=bold_font, fg=text_color)
+        self.yearLabelRegular = tk.Label(self.details_frame, text="Year Published: ", font=regular_font)
+        self.yearLabelRegular.pack(anchor='w')
+        self.yearLabel = tk.Label(self.details_frame, text=f"{self.book.yearPublished}", font=bold_font, fg=text_color)
         self.yearLabel.pack(anchor='w')
 
         # Publisher
-        tk.Label(details_frame, text="Publisher: ", font=regular_font).pack(anchor='w')
-        self.publisherLabel = tk.Label(details_frame, text=f"{self.book.publisher}", font=bold_font, fg=text_color)
+        self.publisherLabelRegular = tk.Label(self.details_frame, text="Publisher: ", font=regular_font)
+        self.publisherLabelRegular.pack(anchor='w')
+        self.publisherLabel = tk.Label(self.details_frame, text=f"{self.book.publisher}", font=bold_font, fg=text_color)
         self.publisherLabel.pack(anchor='w')
 
         # Rating
-        tk.Label(details_frame, text="Rating: ", font=regular_font).pack(anchor='w')
-        self.ratingLabel = tk.Label(details_frame, text=f"{rating}", font=bold_font, fg=text_color)
+        self.ratingLabelRegular = tk.Label(self.details_frame, text="Rating: ", font=regular_font)
+        self.ratingLabelRegular.pack(anchor='w')
+        self.ratingLabel = tk.Label(self.details_frame, text=f"{rating}", font=bold_font, fg=text_color)
         self.ratingLabel.pack(anchor='w')
 
         # Only display 1000 characters of the summary
@@ -334,21 +344,17 @@ class BookDetailsPage(tk.Frame):
         # only display 180 characters of the formatted summary each line
         formatted_summary = "\n".join([formatted_summary[i:i+180] for i in range(0, len(formatted_summary), 180)])
 
-        tk.Label(details_frame, text="Summary: ", font=regular_font).pack(anchor='w')
-        self.summaryLabel = tk.Label(details_frame, text=f"{formatted_summary}", font=("Helvetica", 16), justify='left', fg=text_color)
+        self.summaryLabelRegular = tk.Label(self.details_frame, text="Summary: ", font=regular_font)
+        self.summaryLabelRegular.pack(anchor='w')
+        self.summaryLabel = tk.Label(self.details_frame, text=f"{formatted_summary}", font=("Helvetica", 16), justify='left', fg=text_color)
         self.summaryLabel.pack(anchor='w')
 
-        self.availabilityLabel = tk.Label(details_frame, text=f"Availability: {self.book.availability}", font=("Helvetica", 16))
+        self.availabilityLabel = tk.Label(self.details_frame, text=f"Availability: {self.book.availability}", font=("Helvetica", 16))
         self.availabilityLabel.pack(anchor='e', pady=15, padx=15)
 
     def clearBookDetails(self):
         """Clear book details from the page"""
-        self.titleLabel.pack_forget()
-        self.authorLabel.pack_forget()
-        self.ISBNLabel.pack_forget()
-        self.yearLabel.pack_forget()
-        self.publisherLabel.pack_forget()
-        self.availabilityLabel.pack_forget()
+        self.details_frame.pack_forget()
 
     def returnBook(self):
         """Return the book and update the page"""
@@ -830,7 +836,7 @@ class CustomToolbar(tk.Frame):
         if theme == "high_contrast":
             # white text on black background and dark grey butotns
             background_color = "#000000"  
-            text_color = "#FFFFF"  
+            text_color = "#FFFFFF"  
             button_color = "#333333"  
         elif theme == "normal":
             # default colours

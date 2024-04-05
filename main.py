@@ -29,7 +29,8 @@ class App(tk.Tk):
 
         # self.toolbar.save_default_font()
 
-        self.show_frame("HomePage")
+        # User must login for borrow history to work
+        self.show_frame("StartPage")
 
     def show_frame(self, cont, username=None):
         """Show a frame for the given page name"""
@@ -62,7 +63,7 @@ class App(tk.Tk):
         frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)
         frame.tkraise()
 
-    # walk throygh all widgets to change fonts
+    # walk through all widgets to change fonts
     def walk_widgets(self, container=None):
         if container is None:
             container = self
