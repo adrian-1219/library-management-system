@@ -2,6 +2,7 @@ import tkinter as tk
 from pages import StartPage, RegisterPage, LoginPage, HomePage, SearchPage, BorrowedBooksPage, AccountPage, \
     BookDetailsPage, CustomToolbar
 import tkinter.font as tkfont
+from cryptography.fernet import Fernet
 
 class App(tk.Tk):
     def __init__(self):

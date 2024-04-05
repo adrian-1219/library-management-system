@@ -1,5 +1,16 @@
 import sqlite3
-import bcrypt
+from cryptography.fernet import Fernet
+
+with open('encryption_key', 'r') as f:
+    key = f.readline()
+
+def encrypt(password, key):
+    et = Fernet(key).encrypt(password.encode()) 
+    return et.decode()
+
+def decrypt(encryptedPassword, key):
+    dt = Fernet(key).decrypt(encryptedPassword)
+    return dt.decode()
 
 class RegisterFunction():
     @staticmethod
@@ -15,10 +26,10 @@ class RegisterFunction():
     def insert_account(username, password):
         conn = sqlite3.connect('library.db')
         c = conn.cursor()
-        c.execute("INSERT INTO account (username, password) VALUES (?, ?)", (username, password))
+        encryptedPass = encrypt(password, key)
+        c.execute("INSERT INTO account (username, password) VALUES (?, ?)", (username, encryptedPass))
         conn.commit()
         conn.close()
-
 
     @staticmethod
     def check_username(username):
@@ -44,7 +55,8 @@ class RegisterFunction():
     def update_password(username, new_password):
         conn = sqlite3.connect('library.db')
         c = conn.cursor()
-        c.execute("UPDATE account SET password = ? WHERE username = ?", (new_password, username))
+        encryptedPass = encrypt(new_password, key)
+        c.execute("UPDATE account SET password = ? WHERE username = ?", (encryptedPass, username))
         conn.commit()
         conn.close()
 

@@ -37,7 +37,6 @@ class StartPage(tk.Frame):
         ttk.Button(self, text="Login", style='Transparent.TButton', command=lambda: controller.show_frame("LoginPage")).place(relx=0.5, rely=0.5, anchor="center")
 
 
-
 class RegisterPage(tk.Frame):
     """This is the register page of the library management system. It will allow the user to register to the system.
     background image from: https://blog.theadl.com/2018/07/06/digital-libraries-from-keepers-to-communicators/"""
@@ -164,12 +163,17 @@ class LoginPage(tk.Frame):
             self.controller.username = username
         else:
             messagebox.showerror("Login Failed", "Incorrect username or password.")
+        # clear input fields after each attempt
+        self.username_entry.delete(0, tk.END)
+        self.password_entry.delete(0, tk.END)
 
     def check_password(self, username, password):
         # check if the username is in the database
         result = RegisterFunction.check_username(username)
+        with open('encryption_key', 'r') as f:
+            key = f.readline()
         # if the username is in the database, it will check if the password is correct or not
-        if result and result[1] == password:
+        if result and account_manager.decrypt(result[1],key) == password:
             self.controller.current_account = username
             return True
         return False
@@ -604,7 +608,8 @@ class AccountPage(tk.Frame):
         self.toolbar = CustomToolbar(self, controller)
         self.toolbar.pack(side="top", fill="x")
         self.username_label = None
-        self.password_label = None
+        # Let's not show the password here
+        # self.password_label = None
         tk.Label(self, text="Account Page", font="Helvetica 30 bold").place(relx=0.5, rely=0.1, anchor="center")
         ttk.Button(self, text="Change Username", command=self.change_username).place(relx=0.5, rely=0.5,
                                                                                      anchor="center")
@@ -617,16 +622,16 @@ class AccountPage(tk.Frame):
         # clear the previous account information
         if self.username_label:
             self.username_label.destroy()
-        if self.password_label:
-            self.password_label.destroy()
+        # if self.password_label:
+        #     self.password_label.destroy()
 
         if self.controller.username:
             username, password = account_manager.RegisterFunction.get_account(self.controller.username)
             # Display the account username and password as a label on the page
             self.username_label = tk.Label(self, text=f"Username: {username}", font="Helvetica 20")
             self.username_label.place(relx=0.35, rely=0.3, anchor="w")
-            self.password_label = tk.Label(self, text=f"Password: {password}", font="Helvetica 20")
-            self.password_label.place(relx=0.35, rely=0.4, anchor="w")
+            # self.password_label = tk.Label(self, text=f"Password: {password}", font="Helvetica 20")
+            # self.password_label.place(relx=0.35, rely=0.4, anchor="w")
 
     # this function allows the user to modify the password via the account_manager.py
     def change_password(self):
@@ -647,6 +652,10 @@ class AccountPage(tk.Frame):
             username, password = account_manager.RegisterFunction.get_account(self.controller.username)
             # ask the user to enter the new username
             new_username = simpledialog.askstring("Input", "Enter the new username", parent=self)
+            # check if new username exists
+            if account_manager.RegisterFunction.check_username(new_username):
+                messagebox.showerror("Username Change Failed", "Username is already taken.")
+                return
             # if the user entered the new username
             if new_username:
                 # update the username
