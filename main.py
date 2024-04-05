@@ -9,7 +9,14 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Library Management System')
-        self.geometry('1280x680')
+        window_width = 1280
+        window_height = 680
+        # center the program window
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x = (screen_width / 2) - (window_width / 2)
+        y = (screen_height / 2) - (window_height / 2)
+        self.geometry("%dx%d+%d+%d" % (window_width, window_height, x, y))
         self.resizable(False, False)
         # self.set_default_font()
         self.container = tk.Frame(self)
