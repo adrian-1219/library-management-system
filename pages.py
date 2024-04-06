@@ -29,7 +29,7 @@ class StartPage(tk.Frame):
 
         # draw text
         canvas.create_text(640, 230, text="Library Management System", font="Georgia 45 bold", fill="#2196F3")
-
+        db_font = controller.db_font
         style = ttk.Style()
 
         # change to 'aqua' for originally styled buttons
@@ -38,7 +38,8 @@ class StartPage(tk.Frame):
                         background='SystemButtonFace',
                         relief="flat",
                         foreground="black",
-                        )
+                        font=db_font)
+
 
         ttk.Button(self, text="Register", style='Transparent.TButton',
                    command=lambda: controller.show_frame("RegisterPage")).place(relx=0.5, rely=0.5, anchor="center")
@@ -48,7 +49,7 @@ class StartPage(tk.Frame):
 
 class RegisterPage(tk.Frame):
     """This is the register page of the library management system. It will allow the user to register to the system.
-    background image from: https://blog.theadl.com/2018/07/06/digital-libraries-from-keepers-to-communicators/"""
+    background image from: Photo by Kseniya Lapteva: https://www.pexels.com/photo/photo-of-a-blue-textile-9176067/"""
 
     def __init__(self, parent, controller):
         super().__init__(parent)
@@ -57,20 +58,21 @@ class RegisterPage(tk.Frame):
 
         canvas = tk.Canvas(self, width=1280, height=680, highlightthickness=0)
         canvas.pack(fill='both', expand=True)
+        bd_font = controller.bd_font
         # background
         self.register_image = Image.open("assets/login-register.png")
         self.resized_register_image = self.register_image.resize((1280, 680))
         self.register_background = ImageTk.PhotoImage(self.resized_register_image)
         canvas.create_image(640, 340, image=self.register_background)
         # draw text
-        canvas.create_text(640, 200, text="Register", font="Helvetica 30 bold", fill="#FFE082")
+        canvas.create_text(640, 200, text="Register", font=bd_font, fill="#FFE082")
         # configure style
         style = ttk.Style()
         # change to 'aqua' for originally sytled buttons
         style.theme_use('alt')
         style.configure('Transparent.TButton', borderwidth=0, padding=0)
 
-        # a button to go back to the start page on the top left corner
+        # a button to go back to the start page in the top left corner
         ttk.Button(self, text="Back", style='Transparent.TButton',
                    command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
 
@@ -79,7 +81,7 @@ class RegisterPage(tk.Frame):
         canvas.create_text(510, 410, text="Verify Password:", font="Helvetica 15", fill="#FFE082")
         # entry boxes for the username, password, and verify password
         self.username_placeholder = "Bookworm123"
-        self.username_entry = tk.Entry(self, bg="#E0E0E0", border=0, relief="sunken")
+        self.username_entry = tk.Entry(self, bg="#BEBEBE", border=0, relief="sunken")
         self.username_entry.insert(0, self.username_placeholder)
         self.username_entry.bind('<FocusIn>',
                                  lambda event, e=self.username_entry: LoginPage.
@@ -92,7 +94,7 @@ class RegisterPage(tk.Frame):
 
         # show the password as asterisks
         self.password_placeholder = "12345"
-        self.password_entry = tk.Entry(self, show="*", bg="#E0E0E0", borderwidth=0, relief="sunken")
+        self.password_entry = tk.Entry(self, show="*", bg="#BEBEBE", borderwidth=0, relief="sunken")
         self.password_entry.insert(0, self.password_placeholder)
 
         self.password_entry.bind('<FocusIn>', lambda event, e=self.password_entry: LoginPage.
@@ -102,15 +104,20 @@ class RegisterPage(tk.Frame):
         self.password_entry.configure(fg='grey')
         self.password_entry.place(relx=0.45, rely=0.5, anchor="w")
 
-        self.verify_password_entry = tk.Entry(self, fg="black", show="*", bg="#E0E0E0", borderwidth=0, relief="sunken")
+        self.verify_password_entry = tk.Entry(self, fg="black", show="*", bg="#BEBEBE", borderwidth=0, relief="sunken")
         self.verify_password_entry.place(relx=0.45, rely=0.6, anchor="w")
 
         ttk.Button(self, text="Register", style='Transparent.TButton',
                    command=self.register_user).place(relx=0.5, rely=0.7, anchor="center")
+        # allow user to press enter to register
+        self.username_entry.bind("<Return>", lambda event: self.register_user())
+        self.password_entry.bind("<Return>", lambda event: self.register_user())
+        self.verify_password_entry.bind("<Return>", lambda event: self.register_user())
+        self.bind("<Return>", lambda event: self.register_user())
 
     def register_user(self):
         """this function will register the user into the database and check if the username already exists or not
-        background image from: https://blog.theadl.com/2018/07/06/digital-libraries-from-keepers-to-communicators/"""
+        background image from: Photo by Kseniya Lapteva:https://www.pexels.com/photo/photo-of-a-blue-textile-9176067/"""
         username = self.username_entry.get()
         password = self.password_entry.get()
         v_password = self.verify_password_entry.get()
@@ -144,7 +151,8 @@ class LoginPage(tk.Frame):
         super().__init__(parent)
         self.controller = controller
         controller.add_menu(self)
-
+        db_font = controller.db_font
+        bd_font = controller.bd_font
         canvas = tk.Canvas(self, width=1280, height=680, highlightthickness=0)
         canvas.pack(fill='both', expand=True)
 
@@ -154,21 +162,21 @@ class LoginPage(tk.Frame):
         self.login_background = ImageTk.PhotoImage(self.resized_login_image)
         canvas.create_image(640, 340, image=self.login_background)
         # draw text
-        canvas.create_text(640, 200, text="Login", font="Helvetica 30 bold", fill="#FFE082")
+        canvas.create_text(640, 200, text="Login", font=bd_font, fill="#FFE082")
         # configure style
         style = ttk.Style()
         style.theme_use('alt')
         style.configure('Transparent.TButton', borderwidth=0, padding=0)
-        # a button to go back to the start page on the top left corner
+        # a button to go back to the start page in the top left corner
         ttk.Button(self, text="Back", style='Transparent.TButton',
                    command=lambda: controller.show_frame("StartPage")).place(relx=0.1, rely=0.1, anchor="center")
 
-        canvas.create_text(510, 270, text="Username:", font="Helvetica 20", fill="#FFE082")
-        canvas.create_text(510, 340, text="Password:", font="Helvetica 20", fill="#FFE082")
+        canvas.create_text(510, 270, text="Username:", font=db_font, fill="#FFE082")
+        canvas.create_text(510, 340, text="Password:", font=db_font, fill="#FFE082")
 
         # Username entry
-        self.username_placeholder = "genius user name"
-        self.username_entry = tk.Entry(self, bg="#E0E0E0", border=0, relief="sunken")
+        self.username_placeholder = "your genius username"
+        self.username_entry = tk.Entry(self, bg="#BEBEBE", border=0, relief="sunken")
         self.username_entry.insert(0, self.username_placeholder)
 
         self.username_entry.bind('<FocusIn>',
@@ -180,7 +188,7 @@ class LoginPage(tk.Frame):
 
         # Password entry
         self.password_placeholder = "Password"
-        self.password_entry = tk.Entry(self, show="*", bg="#E0E0E0", borderwidth=0, relief="sunken")
+        self.password_entry = tk.Entry(self, show="*", bg="#BEBEBE", borderwidth=0, relief="sunken")
         self.password_entry.insert(0, self.password_placeholder)
 
         self.password_entry.bind('<FocusIn>',
@@ -192,7 +200,9 @@ class LoginPage(tk.Frame):
 
         ttk.Button(self, text="Log In", style='Transparent.TButton',
                    command=self.attempt_login).place(relx=0.5, rely=0.6, anchor="center")
-
+        self.username_entry.bind("<Return>", lambda event: self.attempt_login())
+        self.password_entry.bind("<Return>", lambda event: self.attempt_login())
+        self.bind("<Return>", lambda event: self.attempt_login())
     # improve UI functions:
 
     @staticmethod
@@ -224,7 +234,6 @@ class LoginPage(tk.Frame):
             self.controller.username = username
         else:
             messagebox.showerror("Login Failed", "Incorrect username or password.")
-        # clear input fields after each attempt
         self.username_entry.delete(0, tk.END)
         self.password_entry.delete(0, tk.END)
 
@@ -268,10 +277,10 @@ class HomePage(tk.Frame):
         # get all the books from the database
         # all_books = book_manager.search()
         # random_books = random.sample(all_books, min(len(all_books), 10))
-
+        bd_font = self.controller.bd_font
         # get random books from the database by choosing a random page and a random entry
         random_books = book_manager.fetch_random_books(10)
-        tk.Label(self.books_frame, text="   Books of The Day", font=("Helvetica", 20, "bold"), anchor="w").pack(
+        tk.Label(self.books_frame, text="  Books of The Day", font=bd_font, anchor="w", fg="#2196F3").pack(
             fill="x", pady=(10, 20))
 
         for book in random_books:
@@ -315,7 +324,8 @@ class BookDetailsPage(tk.Frame):
         self.book = book
         self.toolbar = CustomToolbar(self, controller)
         self.toolbar.pack(side="top", fill="x")
-        tk.Label(self, text="Book Details", font=("Helvetica", 20, "bold")).pack(pady=10)
+        bd_font = controller.bd_font
+        tk.Label(self, text="Book Details", font=bd_font).pack(pady=10)
 
         # Display book information
         self.display_book_details()
@@ -339,63 +349,74 @@ class BookDetailsPage(tk.Frame):
 
     def display_book_details(self):
         """Display book details on the page"""
+
         # get the summary and rating of the book from the google books api
         summary_rating = self.get_book_details(str(self.book.ISBN))
         summary, rating = summary_rating
         df_font = self.controller.db_font
-        bd_font = self.controller.bd_FONT
         # details container frame
         self.details_frame = tk.Frame(self)
         self.details_frame.pack(fill='x', padx=10, pady=10)
-        text_color = "#68fcf7"
-
+        self.controller.change_colour(self.controller.theme)
+        text_color = "white" if self.controller.theme == "normal" else "yellow"
+        bg_color = "#323232" if self.controller.theme == "normal" else "black"
         # Title
-        self.titleLabelRegular = tk.Label(self.details_frame, text="Title: ", font=df_font)
+        self.titleLabelRegular = tk.Label(self.details_frame, text="Title: ", font=df_font, fg=text_color, bg=bg_color)
         self.titleLabelRegular.pack(anchor='w')
-        self.titleLabel = tk.Label(self.details_frame, text=f"{self.book.title}", font=bd_font, fg=text_color)
+        self.titleLabel = tk.Label(self.details_frame, text=f"{self.book.title}", font=df_font, fg=text_color,
+                                   bg=bg_color)
         self.titleLabel.pack(anchor='w')
 
         # Author
-        self.authorLabelRegular = tk.Label(self.details_frame, text="Author: ", font=df_font)
+        self.authorLabelRegular = tk.Label(self.details_frame, text="Author: ", font=df_font, fg=text_color,
+                                           bg=bg_color)
         self.authorLabelRegular.pack(anchor='w')
-        self.authorLabel = tk.Label(self.details_frame, text=f"{self.book.author}", font=bd_font, fg=text_color)
+        self.authorLabel = tk.Label(self.details_frame, text=f"{self.book.author}", font=df_font, fg=text_color,
+                                    bg=bg_color)
         self.authorLabel.pack(anchor='w')
 
         # ISBN
-        self.ISBNLabelRegular = tk.Label(self.details_frame, text="ISBN: ", font=df_font)
+        self.ISBNLabelRegular = tk.Label(self.details_frame, text="ISBN: ", font=df_font, fg=text_color, bg=bg_color)
         self.ISBNLabelRegular.pack(anchor='w')
-        self.ISBNLabel = tk.Label(self.details_frame, text=f"{self.book.ISBN}", font=bd_font, fg=text_color)
+        self.ISBNLabel = tk.Label(self.details_frame, text=f"{self.book.ISBN}", font=df_font, fg=text_color,
+                                  bg=bg_color)
         self.ISBNLabel.pack(anchor='w')
 
         # Year Published
-        self.yearLabelRegular = tk.Label(self.details_frame, text="Year Published: ", font=df_font)
+        self.yearLabelRegular = tk.Label(self.details_frame, text="Year Published: ", font=df_font, fg=text_color,
+                                         bg=bg_color)
         self.yearLabelRegular.pack(anchor='w')
-        self.yearLabel = tk.Label(self.details_frame, text=f"{self.book.yearPublished}", font=bd_font, fg=text_color)
+        self.yearLabel = tk.Label(self.details_frame, text=f"{self.book.yearPublished}", font=df_font, fg=text_color,
+                                  bg=bg_color)
         self.yearLabel.pack(anchor='w')
 
         # Publisher
-        self.publisherLabelRegular = tk.Label(self.details_frame, text="Publisher: ", font=df_font)
+        self.publisherLabelRegular = tk.Label(self.details_frame, text="Publisher: ", font=df_font, fg=text_color,
+                                              bg=bg_color)
         self.publisherLabelRegular.pack(anchor='w')
-        self.publisherLabel = tk.Label(self.details_frame, text=f"{self.book.publisher}", font=bd_font, fg=text_color)
+        self.publisherLabel = tk.Label(self.details_frame, text=f"{self.book.publisher}", font=df_font, fg=text_color,
+                                       bg=bg_color)
         self.publisherLabel.pack(anchor='w')
 
         # Rating
-        self.ratingLabelRegular = tk.Label(self.details_frame, text="Rating: ", font=df_font)
+        self.ratingLabelRegular = tk.Label(self.details_frame, text="Rating: ", font=df_font, fg=text_color,
+                                           bg=bg_color)
         self.ratingLabelRegular.pack(anchor='w')
-        self.ratingLabel = tk.Label(self.details_frame, text=f"{rating}", font=bd_font, fg=text_color)
+        self.ratingLabel = tk.Label(self.details_frame, text=f"{rating}", font=df_font, fg=text_color, bg=bg_color)
         self.ratingLabel.pack(anchor='w')
 
         formatted_summary = summary[:1000] + "..." if len(summary) > 1000 else summary
         formatted_summary = "\n".join([formatted_summary[i:i + 180] for i in range(0, len(formatted_summary), 180)])
 
-        self.summaryLabelRegular = tk.Label(self.details_frame, text="Summary: ", font=df_font)
+        self.summaryLabelRegular = tk.Label(self.details_frame, text="Summary: ", font=df_font, fg=text_color,
+                                            bg=bg_color)
         self.summaryLabelRegular.pack(anchor='w')
-        self.summaryLabel = tk.Label(self.details_frame, text=f"{formatted_summary}", font=bd_font, justify='left',
-                                     fg=text_color)
+        self.summaryLabel = tk.Label(self.details_frame, text=f"{formatted_summary}", font=df_font, justify='left',
+                                     fg=text_color, wraplength=800, bg=bg_color)
         self.summaryLabel.pack(anchor='w', expand=True)
 
         self.availabilityLabel = tk.Label(self.details_frame, text=f"Availability: {self.book.availability}",
-                                          font=("Helvetica", 16))
+                                          font=df_font, fg=text_color, bg=bg_color)
         self.availabilityLabel.pack(anchor='e', pady=15, padx=15)
 
     def clear_book_details(self):
@@ -595,7 +616,7 @@ class BorrowedBooksPage(tk.Frame):
         # Borrow history treeview
         self.treeview = ttk.Treeview(self, columns=("title", "author", "dateBorrowed", "status"))
         self.treeview.column("#0", width=100)
-        self.treeview.column("title", width=500)
+        self.treeview.column("title", width=600)
         self.treeview.column("author", width=200)
         self.treeview.column("dateBorrowed", width=200)
         self.treeview.column("status")
@@ -678,10 +699,6 @@ class BorrowedBooksPage(tk.Frame):
 
 
 class AccountPage(tk.Frame):
-    # wait for account_manager.py to be implemented first
-    # second option: update the account info in this class
-
-    # Placeholder for AccountPage and Borrowed books details go in this page
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
@@ -689,7 +706,8 @@ class AccountPage(tk.Frame):
         self.toolbar.pack(side="top", fill="x")
         self.username_label = None
         self.password_label = None
-        tk.Label(self, text="Account Page", font="Helvetica 30 bold").place(relx=0.5, rely=0.1, anchor="center")
+        tk.Label(self, text="Account Page",
+                 font=Font(family="Times New Roman", size=30, weight="bold")).place(relx=0.5, rely=0.1, anchor="center")
         ttk.Button(self, text="Change Username", command=self.change_username).place(relx=0.5, rely=0.5,
                                                                                      anchor="center")
         ttk.Button(self, text="Change Password", command=self.change_password).place(relx=0.5, rely=0.55,
@@ -720,9 +738,9 @@ class AccountPage(tk.Frame):
 
     # only show the password in plaintext if the user clicks the show password button
     def show_password(self, password):
+        # decrpt the password and show it in plaintext
         if self.password_label:
             self.password_label.destroy()
-
         password = account_manager.decrypt(password, account_manager.key)
         self.password_label = tk.Label(self, text=f"Password: {password}",
                                        font=Font(family="Times New Roman", size=20, weight="bold"))
@@ -750,11 +768,13 @@ class AccountPage(tk.Frame):
             username, password = account_manager.RegisterFunction.get_account(self.controller.username)
             # ask the user to enter the new username
             new_username = simpledialog.askstring("Input", "Enter the new username", parent=self)
+            # if the user entered the new username
+
             # check if new username exists
             if account_manager.RegisterFunction.check_username(new_username):
                 messagebox.showerror("Username Change Failed", "Username is already taken.")
                 return
-            # if the user entered the new username
+
             if new_username:
                 # update the username
                 # transfer the borrowed books to the new username
@@ -766,7 +786,8 @@ class AccountPage(tk.Frame):
 
 
 class RecommendPage(tk.Frame):
-    # for books suggestions based on user's borrowing history
+    # for books suggestions based on user's borrowing history -
+    # if the user has borrowed a book by an author, recommend more books by the same author
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -781,14 +802,12 @@ class RecommendPage(tk.Frame):
 
         self.display_recommendations()
 
-        
     def display_recommendations(self):
         # Fetch the most recent borrowed book for the current user
-        recent_book = borrow_manager.get_most_recent_borrowed_book(self.controller.username)
-        if recent_book:
-            # If there's a recent book, use its author for recommendations
-            author_name = recent_book.author
-            recommended_books = book_manager.fetch_random_books_by_author(author_name, 10)
+        recent_author = borrow_manager.get_most_recent_borrowed_book_author(self.controller.username)
+        if recent_author:
+            # find books by the same author
+            recommended_books = book_manager.fetch_random_books_by_author(recent_author, 10)
             tk.Label(self.books_frame, text="   Books Recommended", font=("Helvetica", 20, "bold"), anchor="w").pack(fill="x", pady=(10, 20))
             for book in recommended_books:
                 book_btn = ttk.Button(self.books_frame, text=f"•  {book.title} by {book.author} ({book.yearPublished})", style='Link.TButton', command=lambda b=book: self.show_book_info(b))
@@ -805,11 +824,9 @@ class RecommendPage(tk.Frame):
                                       command=lambda b=book: self.show_book_info(b))
                 book_btn.pack(fill='x', padx=20, pady=5)
 
-
     def show_book_info(self, book):
         # invoke the show_book function in the controller to tkraise the BookDetailsPage
         self.controller.show_book("BookDetailsPage", book)
-
 
 
 class CustomToolbar(tk.Frame):
@@ -822,11 +839,12 @@ class CustomToolbar(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.controller = controller
         self.search_icon = tk.PhotoImage(file="assets/search.png")
+        db_font = controller.db_font
         # home page button
-        tk.Button(self, text="Home", command=lambda: controller.show_frame("HomePage")).pack(side="left", padx=10,
-                                                                                             pady=10)
+        ttk.Button(self, text="Home", command=lambda: controller.show_frame("HomePage"), style='Transparent.TButton'). \
+            pack(side="left", padx=10, pady=10)
         # account menu
-        account_menu = tk.Menubutton(self, text="Account", relief=tk.RAISED)
+        account_menu = tk.Menubutton(self, text="Account", relief=tk.RAISED, font=db_font)
         account_menu.menu = tk.Menu(account_menu, tearoff=0)
         account_menu["menu"] = account_menu.menu
 
@@ -846,7 +864,7 @@ class CustomToolbar(tk.Frame):
                                                                                                           padx=10,
                                                                                                           pady=10)
         # Accessibility Menu
-        accessibility_menu = tk.Menubutton(self, text="Accessibility", relief=tk.RAISED)
+        accessibility_menu = tk.Menubutton(self, text="Accessibility", relief=tk.RAISED, font=db_font)
         accessibility_menu.menu = tk.Menu(accessibility_menu, tearoff=0)
         accessibility_menu["menu"] = accessibility_menu.menu
         accessibility_menu.pack(side="right", padx=10, pady=10)
@@ -860,3 +878,4 @@ class CustomToolbar(tk.Frame):
     # debug
     def update_account_page(self):
         AccountPage.display_account_info(self.controller.frames["AccountPage"])
+

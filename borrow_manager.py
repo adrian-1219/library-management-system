@@ -54,18 +54,20 @@ def transferBorrow(username, newUsername):
     connection.commit()
 
 
-def get_most_recent_borrowed_book(username):
-    # This assumes the "books" table contains details like "bookISBN", and the "borrow" table tracks the borrow history.
-    cursor.execute('''SELECT a.bookISBN FROM borrow a
+def get_most_recent_borrowed_book_author(username):
+    # fetch the author of the most recently borrowed book.
+    cursor.execute('''SELECT b.author FROM borrow a
+                      JOIN books b ON a.bookISBN = b.ISBN
                       WHERE a.username = ? ORDER BY a.dateBorrowed DESC LIMIT 1''', (username,))
     result = cursor.fetchone()
     if result:
-        bookISBN = result[0]
-        return book_manager.getBookDetails(bookISBN)
-    return 
+        author_name = result[0]
+        return author_name
+    return None
 # print(book_manager.fetch_random_books_by_author('Golden Books', 10))
 
-
+# recent_author = get_most_recent_borrowed_book_author('frank')
+# print("Recent author:", recent_author)
 
 # testing
 # returnBook("a", "0679425608")

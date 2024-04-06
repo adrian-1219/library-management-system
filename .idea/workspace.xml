@@ -6,7 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="f5b4b39c-3e3b-4e18-aa67-ea6388cd9697" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/login-register.png" beforeDir="false" afterPath="$PROJECT_DIR$/assets/login-register.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/start.png" beforeDir="false" afterPath="$PROJECT_DIR$/assets/start.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/borrow_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/borrow_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/library.db" beforeDir="false" afterPath="$PROJECT_DIR$/library.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,7 +111,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="adrian_search_testFile" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="borrow_manager" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="library-management-system" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -118,7 +123,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/prev_files_4_record/adrian_search_testFile.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/borrow_manager.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -222,9 +227,9 @@
       <list>
         <item itemvalue="Python.main" />
         <item itemvalue="Python.account_manager" />
+        <item itemvalue="Python.borrow_manager" />
         <item itemvalue="Python.pages" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.adrian_search_testFile" />
       </list>
     </recent_temporary>
   </component>
