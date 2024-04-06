@@ -465,7 +465,7 @@ class SearchPage(tk.Frame):
 
         # Container Frame for search
         search_container = tk.Frame(self)
-        search_container.pack(side="top", fill="x", padx=10, pady=10)
+        search_container.pack(side="top", fill="x", padx=10, pady=30)
 
         # Year range selection for search
         # print(datetime.date.today())
@@ -506,7 +506,7 @@ class SearchPage(tk.Frame):
 
         # Result page controls
         page_container = tk.Frame(self)
-        page_container.pack(side="top", fill="x", pady=5)
+        page_container.pack(side="top", fill="x", pady=30)
         self.prevPageBtn = tk.Button(page_container, text="<<<", command=self.prev_page, state="disabled")
         self.prevPageBtn.pack(side="left")
         self.pageNum = tk.Label(page_container, textvariable=self.pageVar, width=5)
@@ -595,7 +595,7 @@ class BorrowedBooksPage(tk.Frame):
         # Borrow history treeview
         self.treeview = ttk.Treeview(self, columns=("title", "author", "dateBorrowed", "status"))
         self.treeview.column("#0", width=100)
-        self.treeview.column("title", width=600)
+        self.treeview.column("title", width=500)
         self.treeview.column("author", width=200)
         self.treeview.column("dateBorrowed", width=200)
         self.treeview.column("status")
@@ -604,11 +604,11 @@ class BorrowedBooksPage(tk.Frame):
         self.treeview.heading("author", text="Author")
         self.treeview.heading("dateBorrowed", text="Date Borrowed")
         self.treeview.heading("status", text="Status")
-        self.treeview.pack(side="top", expand=True, fill="both", padx=10, pady=(5, 0))
+        self.treeview.pack(side="top", expand=True, fill="both", padx=10, pady=30)
 
         # Borrow history page controls
         page_container = tk.Frame(self)
-        page_container.pack(side="top", fill="x", pady=5)
+        page_container.pack(side="top", fill="x", pady=30)
         self.prevPageBtn = tk.Button(page_container, text="<<<", command=self.prev_page, state="disabled")
         self.prevPageBtn.pack(side="left")
         self.pageNum = tk.Label(page_container, textvariable=self.pageVar, width=5)
@@ -853,36 +853,10 @@ class CustomToolbar(tk.Frame):
 
         # Colour menu
         colour_menu = tk.Menu(accessibility_menu.menu, tearoff=0)
-        colour_menu.add_command(label="High Contrast", command=lambda: self.change_colour("high_contrast"))
-        colour_menu.add_command(label="Black & White", command=lambda: self.change_colour("normal"))
+        colour_menu.add_command(label="High Contrast", command=lambda: controller.change_colour("high_contrast"))
+        colour_menu.add_command(label="Black & White", command=lambda: controller.change_colour("normal"))
         accessibility_menu.menu.add_cascade(label="Colour", menu=colour_menu)
 
     # debug
     def update_account_page(self):
         AccountPage.display_account_info(self.controller.frames["AccountPage"])
-
-    def change_colour(self, theme):
-        """for accessibility, change the colour of the text and buttons for better readability"""
-        if theme == "high_contrast":
-            background_color = "red"
-            text_color = "blue"
-            button_color = "red"
-        elif theme == "normal":
-            # default colours
-            background_color = "SystemButtonFace"
-            text_color = "black"
-            button_color = "SystemButtonFace"
-
-        # apply colors to tkinter widgets
-        for widget in self.controller.walk_widgets():
-            if isinstance(widget, tk.Label) or isinstance(widget, tk.Entry):
-                widget.config(background=background_color, foreground=text_color)
-            elif isinstance(widget, tk.Button):
-                widget.config(background=button_color, foreground=text_color, activebackground=button_color)
-
-        # apply colors to ttk widgets
-        style = ttk.Style()
-        style.configure("TLabel", background=background_color, foreground=text_color)
-        style.configure("TButton", background=button_color, foreground=text_color)
-        style.configure("TEntry", fieldbackground=background_color, foreground=text_color)
-        style.map("TButton", background=[("active", button_color)], foreground=[("active", text_color)])
