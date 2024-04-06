@@ -70,3 +70,14 @@ def fetch_random_books(limit=10):
     result = cursor.fetchall()
     return [toBook(row) for row in result]
 
+def fetch_random_books_by_author(author_name, limit=10):
+    """ Fetches a list of random books from a specific author """
+    cursor.execute("SELECT * FROM books WHERE author = ? ORDER BY RANDOM() LIMIT ?", (author_name, limit))
+    result = cursor.fetchall()
+    return [toBook(row) for row in result]
+
+
+# random_books_by_author = fetch_random_books_by_author("Golden Books")
+# for book in random_books_by_author:
+#     print(book.title)
+

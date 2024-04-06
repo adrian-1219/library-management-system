@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter.font import Font
 
 from pages import StartPage, RegisterPage, LoginPage, HomePage, SearchPage, BorrowedBooksPage, AccountPage, \
-    BookDetailsPage
+    BookDetailsPage, RecommendPage
 
 
 class App(tk.Tk):
@@ -33,7 +33,7 @@ class App(tk.Tk):
 
         # Create all the pages, this needs to be updated
         # for each other custom Frame class you make, you could add it to this tuple
-        for F in (StartPage, RegisterPage, LoginPage, HomePage, SearchPage, AccountPage, BorrowedBooksPage, BookDetailsPage):
+        for F in (StartPage, RegisterPage, LoginPage, HomePage, SearchPage, AccountPage, BorrowedBooksPage, BookDetailsPage, RecommendPage):
             frame = F(parent=self.container, controller=self)
             self.frames[F.__name__] = frame  # Use class name as string for key
             frame.place(in_=self.container, x=0, y=0, relwidth=1, relheight=1)

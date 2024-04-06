@@ -767,7 +767,49 @@ class AccountPage(tk.Frame):
 
 class RecommendPage(tk.Frame):
     # for books suggestions based on user's borrowing history
-    pass
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+
+        # put the toolbar on the top of the page
+        self.toolbar = CustomToolbar(self, controller)
+        self.toolbar.pack(side="top", fill="x")
+
+        # Placeholder for recommended books display
+        self.books_frame = tk.Frame(self)
+        self.books_frame.pack(expand=True, fill="both", padx=20, pady=20)
+
+        self.display_recommendations()
+
+        
+    def display_recommendations(self):
+        # Fetch the most recent borrowed book for the current user
+        recent_book = borrow_manager.get_most_recent_borrowed_book(self.controller.username)
+        if recent_book:
+            # If there's a recent book, use its author for recommendations
+            author_name = recent_book.author
+            recommended_books = book_manager.fetch_random_books_by_author(author_name, 10)
+            tk.Label(self.books_frame, text="   Books Recommended", font=("Helvetica", 20, "bold"), anchor="w").pack(fill="x", pady=(10, 20))
+            for book in recommended_books:
+                book_btn = ttk.Button(self.books_frame, text=f"•  {book.title} by {book.author} ({book.yearPublished})", style='Link.TButton', command=lambda b=book: self.show_book_info(b))
+                book_btn.pack(fill='x', padx=20, pady=5)
+        else:
+            # If there's no borrowed book, use random
+            random_books = book_manager.fetch_random_books(10)
+            tk.Label(self.books_frame, text="   Books Recommended", font=("Helvetica", 20, "bold"), anchor="w").pack(
+                fill="x", pady=(10, 20))
+
+            for book in random_books:
+                book_btn = ttk.Button(self.books_frame, text=f"•  {book.title} by {book.author} ({book.yearPublished})",
+                                      style='Link.TButton',
+                                      command=lambda b=book: self.show_book_info(b))
+                book_btn.pack(fill='x', padx=20, pady=5)
+
+
+    def show_book_info(self, book):
+        # invoke the show_book function in the controller to tkraise the BookDetailsPage
+        self.controller.show_book("BookDetailsPage", book)
+
 
 
 class CustomToolbar(tk.Frame):
